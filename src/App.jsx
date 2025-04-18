@@ -227,73 +227,46 @@ const POSSystem = () => {
   };
 
   // print receipt function - optimized to only print the receipt
-  const printReceipt = () => {
-    if (!receiptRef.current) return;
-    
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank', 'height=600,width=800');
-    
-    // Get styles
-    const styles = Array.from(document.styleSheets)
-      .map(styleSheet => {
-        try {
-          return Array.from(styleSheet.cssRules)
-            .map(rule => rule.cssText)
-            .join('\n');
-        } catch (e) {
-          // Ignore errors with cross-origin stylesheets
-          return '';
-        }
-      })
-      .join('\n');
-    
-    // Get receipt content
-    const receiptContent = receiptRef.current.innerHTML;
-    
-    // Create print document
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>PT.RIAUJAYA CEMERLANG SUZUKI - Receipt</title>
+    const printReceipt = () => {
+      if (!receiptRef.current) return;
+
+      // iopen blank window synchronously in click handler
+      const printWindow = window.open('', '_blank', 'width=800,height=600');
+
+      // inject styles & content
+      const styles = Array.from(document.styleSheets)
+        .flatMap(sheet => {
+          try { return Array.from(sheet.cssRules).map(rule => rule.cssText); }
+          catch { return []; }
+        })
+        .join('\n');
+
+      printWindow.document.write(`
+        <html><head>
           <style>${styles}</style>
           <style>
-            @media print {
-              body { 
-                padding: 0; 
-                margin: 0;
-                background-color: white !important;
-                color: black !important;
-              }
-              .no-print { display: none !important; }
-            }
-            body {
-              font-family: Arial, sans-serif;
-              background-color: white;
-              color: black;
-            }
+            @media print { .no-print { display: none; } }
+            body { font-family: Arial; }
           </style>
-        </head>
-        <body class="bg-white text-black">
-          <div class="receipt-content">
-            ${receiptContent}
-          </div>
-          <script>
-            window.onload = function() {
-              setTimeout(function() {
-                window.print();
-                setTimeout(function() {
-                  window.close();
-                }, 500);
-              }, 300);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-  };
+        </head><body>
+          <div>${receiptRef.current.innerHTML}</div>
+        </body></html>
+      `);
+      printWindow.document.close();
+
+      // wait for load, then print
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+
+        // use onafterprint if supported
+        if ('onafterprint' in printWindow) {
+          printWindow.onafterprint = () => printWindow.close();
+        } else {
+          setTimeout(() => printWindow.close(), 2000);
+        }
+      };
+    };
   
   // reset transaction
   const resetTransaction = () => {
