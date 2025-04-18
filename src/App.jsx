@@ -230,42 +230,58 @@ const POSSystem = () => {
     const printReceipt = () => {
       if (!receiptRef.current) return;
 
-      // iopen blank window synchronously in click handler
-      const printWindow = window.open('', '_blank', 'width=800,height=600');
+      // crude but effective mobile check
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-      // inject styles & content
+      // open the print window synchronously on click
+      const printWindow = window.open('', '_blank', 'height=600,width=800');
+
+      // grab all CSS
       const styles = Array.from(document.styleSheets)
-        .flatMap(sheet => {
-          try { return Array.from(sheet.cssRules).map(rule => rule.cssText); }
-          catch { return []; }
+        .map(styleSheet => {
+          try {
+            return Array.from(styleSheet.cssRules)
+              .map(rule => rule.cssText)
+              .join('\n');
+          } catch {
+            // ignore cross‑origin sheets
+            return '';
+          }
         })
         .join('\n');
 
+      // get receipt HTML
+      const receiptContent = receiptRef.current.innerHTML;
+
+      // write the full document with conditional close
       printWindow.document.write(`
-        <html><head>
-          <style>${styles}</style>
-          <style>
-            @media print { .no-print { display: none; } }
-            body { font-family: Arial; }
-          </style>
-        </head><body>
-          <div>${receiptRef.current.innerHTML}</div>
-        </body></html>
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>PT.RIAUJAYA CEMERLANG SUZUKI - Receipt</title>
+            <style>${styles}</style>
+            <style>
+              @media print {
+                body { padding:0; margin:0; background:#fff!important; color:#000!important; }
+                .no-print { display:none!important; }
+              }
+              body { font-family:Arial, sans-serif; background:#fff; color:#000; }
+            </style>
+          </head>
+          <body class="bg-white text-black"
+                onload="
+                  window.print();
+                  ${!isMobile ? 'setTimeout(() => window.close(), 500);' : ''}
+                ">
+            <div class="receipt-content">
+              ${receiptContent}
+            </div>
+          </body>
+        </html>
       `);
+
+      // close document so onload will fire
       printWindow.document.close();
-
-      // wait for load, then print
-      printWindow.onload = () => {
-        printWindow.focus();
-        printWindow.print();
-
-        // use onafterprint if supported
-        if ('onafterprint' in printWindow) {
-          printWindow.onafterprint = () => printWindow.close();
-        } else {
-          setTimeout(() => printWindow.close(), 2000);
-        }
-      };
     };
   
   // reset transaction
