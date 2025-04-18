@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Moon, Sun } from 'lucide-react';
 
 const initializeDatabase = () => {
   // predefined cashiers
@@ -70,6 +71,10 @@ const POSSystem = () => {
   const [notes, setNotes] = useState('');
   const [salesNumber, setSalesNumber] = useState('');
   const [printedInfo, setPrintedInfo] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // Reference to the receipt element for printing
+  const receiptRef = useRef(null);
   
   // calculate subtotal from cart items (considering per-item discounts)
   const subtotal = cart.reduce((sum, item) => sum + item.total_price, 0);
@@ -216,17 +221,81 @@ const POSSystem = () => {
       db.transaction_items.push(newItem);
     });
     
-    // fet current transaction for receipt
+    // set current transaction for receipt
     setCurrentTransaction(newTransaction);
     setShowReceipt(true);
   };
 
-  // frint receipt function
+  // print receipt function - optimized to only print the receipt
   const printReceipt = () => {
-    window.print();
+    if (!receiptRef.current) return;
+    
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank', 'height=600,width=800');
+    
+    // Get styles
+    const styles = Array.from(document.styleSheets)
+      .map(styleSheet => {
+        try {
+          return Array.from(styleSheet.cssRules)
+            .map(rule => rule.cssText)
+            .join('\n');
+        } catch (e) {
+          // Ignore errors with cross-origin stylesheets
+          return '';
+        }
+      })
+      .join('\n');
+    
+    // Get receipt content
+    const receiptContent = receiptRef.current.innerHTML;
+    
+    // Create print document
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>PT.RIAUJAYA CEMERLANG SUZUKI - Receipt</title>
+          <style>${styles}</style>
+          <style>
+            @media print {
+              body { 
+                padding: 0; 
+                margin: 0;
+                background-color: white !important;
+                color: black !important;
+              }
+              .no-print { display: none !important; }
+            }
+            body {
+              font-family: Arial, sans-serif;
+              background-color: white;
+              color: black;
+            }
+          </style>
+        </head>
+        <body class="bg-white text-black">
+          <div class="receipt-content">
+            ${receiptContent}
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+                setTimeout(function() {
+                  window.close();
+                }, 500);
+              }, 300);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
   };
   
-  // feset transaction
+  // reset transaction
   const resetTransaction = () => {
     setSelectedCashierId('');
     setCustomerName('');
@@ -254,20 +323,72 @@ const POSSystem = () => {
     return `${percentage.toFixed(2)}%`;
   };
   
+  // toggle dark mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+  
+  // Set up dark mode effect
+  useEffect(() => {
+    // Add or remove dark mode class from body
+    if (darkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [darkMode]);
+  
+  // Generate dynamic color classes based on dark mode
+  const getColorClasses = () => {
+    return {
+      appBg: darkMode ? 'bg-gray-900' : 'bg-gray-100',
+      cardBg: darkMode ? 'bg-gray-800' : 'bg-white',
+      textColor: darkMode ? 'text-white' : 'text-black',
+      textMuted: darkMode ? 'text-gray-300' : 'text-gray-500',
+      border: darkMode ? 'border-gray-700' : 'border-gray-200',
+      tableBg: darkMode ? 'bg-gray-700' : 'bg-gray-50',
+      tableHover: darkMode ? 'hover:bg-gray-600' : 'hover:bg-blue-50',
+      inputBg: darkMode ? 'bg-gray-700' : 'bg-white',
+      inputBorder: darkMode ? 'border-gray-600' : 'border-gray-300',
+      buttonPrimary: 'bg-blue-600 text-white hover:bg-blue-700',
+      buttonSecondary: darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300',
+      productBg: darkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-50'
+    };
+  };
+  
+  const colors = getColorClasses();
+  
   return (
-    <div className="w-full min-h-screen bg-gray-100">
+    <div className={`w-full min-h-screen ${colors.appBg} transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
-        <h1 className="text-3xl font-bold mb-4 text-center">PT.RIAUJAYA CEMERLANG SUZUKI</h1>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className={`text-3xl font-bold ${colors.textColor}`}>PT.RIAUJAYA CEMERLANG SUZUKI</h1>
+          
+          {/* Dark Mode Toggle */}
+          <button
+              onClick={toggleDarkMode}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-md ${
+                darkMode ? 'bg-gray-900' : 'bg-white'
+              }`}
+              aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {darkMode ? (
+                <Moon className="text-white" size={20} />
+              ) : (
+                <Sun className="text-gray-900" size={20} />
+              )}
+            </button>
+        </div>
         
         {!showReceipt ? (
           <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-5 bg-white rounded-lg shadow p-4">
+            <div className={`col-span-5 ${colors.cardBg} rounded-lg shadow p-4 ${colors.textColor}`}>
               <h2 className="text-xl font-semibold mb-4">Produk</h2>
               <div className="grid grid-cols-2 gap-3">
                 {products.map(product => (
                   <div 
                     key={product.id} 
-                    className="border rounded-md p-3 cursor-pointer hover:bg-blue-50 transition-colors"
+                    className={`border ${colors.border} rounded-md p-3 cursor-pointer ${colors.productBg} transition-colors`}
                     onClick={() => addToCart(product)}
                   >
                     <div className="font-medium">{product.name}</div>
@@ -284,7 +405,7 @@ const POSSystem = () => {
                   <select
                     value={selectedCashierId}
                     onChange={(e) => setSelectedCashierId(e.target.value)}
-                    className="border rounded p-2 w-full bg-white"
+                    className={`border ${colors.inputBorder} rounded p-2 w-full ${colors.inputBg} ${colors.textColor}`}
                   >
                     <option value="">-- Pilih Kasir --</option>
                     {cashiers.map(cashier => (
@@ -301,7 +422,7 @@ const POSSystem = () => {
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="border rounded p-2 w-full"
+                    className={`border ${colors.inputBorder} rounded p-2 w-full ${colors.inputBg} ${colors.textColor}`}
                     placeholder="KONSUMEN BENGKEL"
                   />
                 </div>
@@ -312,7 +433,7 @@ const POSSystem = () => {
                     type="text"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="border rounded p-2 w-full"
+                    className={`border ${colors.inputBorder} rounded p-2 w-full ${colors.inputBg} ${colors.textColor}`}
                     placeholder="Nomor telepon pelanggan"
                   />
                 </div>
@@ -322,17 +443,17 @@ const POSSystem = () => {
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="border rounded p-2 w-full h-24"
+                    className={`border ${colors.inputBorder} rounded p-2 w-full h-24 ${colors.inputBg} ${colors.textColor}`}
                     placeholder="Tambahkan catatan (opsional)"
                   ></textarea>
                 </div>
               </div>
             </div>
             
-            <div className="col-span-7 bg-white rounded-lg shadow p-4">
+            <div className={`col-span-7 ${colors.cardBg} rounded-lg shadow p-4 ${colors.textColor}`}>
               <h2 className="text-xl font-semibold mb-4">Keranjang</h2>
               {cart.length === 0 ? (
-                <div className="text-gray-500 text-center py-12">
+                <div className={`${colors.textMuted} text-center py-12`}>
                   <p className="text-lg">Keranjang masih kosong</p>
                   <p className="text-sm mt-2">Pilih produk untuk memulai transaksi</p>
                 </div>
@@ -340,8 +461,8 @@ const POSSystem = () => {
                 <div>
                   <div className="overflow-auto max-h-96">
                     <table className="w-full mb-4">
-                      <thead className="bg-gray-50">
-                        <tr className="border-b">
+                      <thead className={colors.tableBg}>
+                        <tr className={`border-b ${colors.border}`}>
                           <th className="text-left py-2 px-2">Item</th>
                           <th className="text-right px-2">Harga</th>
                           <th className="text-center px-2">Jumlah</th>
@@ -352,18 +473,18 @@ const POSSystem = () => {
                       </thead>
                       <tbody>
                         {cart.map(item => (
-                          <tr key={item.product_id} className="border-b">
+                          <tr key={item.product_id} className={`border-b ${colors.border}`}>
                             <td className="py-3 px-2">{item.product_name}</td>
                             <td className="text-right px-2">{formatCurrency(item.unit_price)}</td>
                             <td className="text-center px-2">
                               <div className="flex items-center justify-center">
                                 <button 
-                                  className="px-2 bg-gray-100 rounded-l"
+                                  className={`px-2 ${colors.tableBg} rounded-l`}
                                   onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
                                 >-</button>
-                                <span className="px-3 py-1 bg-gray-50">{item.quantity}</span>
+                                <span className={`px-3 py-1 ${colors.inputBg}`}>{item.quantity}</span>
                                 <button 
-                                  className="px-2 bg-gray-100 rounded-r"
+                                  className={`px-2 ${colors.tableBg} rounded-r`}
                                   onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
                                 >+</button>
                               </div>
@@ -373,7 +494,7 @@ const POSSystem = () => {
                                 type="number"
                                 value={item.discount_percentage}
                                 onChange={(e) => updateDiscount(item.product_id, Number(e.target.value))}
-                                className="border rounded w-16 p-1 text-right"
+                                className={`border ${colors.inputBorder} rounded w-16 p-1 text-right ${colors.inputBg} ${colors.textColor}`}
                                 min="0"
                                 max="100"
                                 step="0.01"
@@ -392,7 +513,7 @@ const POSSystem = () => {
                     </table>
                   </div>
                   
-                  <div className="border-t pt-4 mt-4">
+                  <div className={`border-t ${colors.border} pt-4 mt-4`}>
                     <div className="flex justify-between mb-2">
                       <span>Subtotal:</span>
                       <span>{formatCurrency(subtotal)}</span>
@@ -411,7 +532,7 @@ const POSSystem = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <button
                         onClick={processTransaction}
-                        className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium text-lg"
+                        className={`${colors.buttonPrimary} py-3 px-4 rounded-lg font-medium text-lg`}
                         disabled={cart.length === 0}
                       >
                         Proses Transaksi
@@ -419,7 +540,7 @@ const POSSystem = () => {
                       
                       <button
                         onClick={resetTransaction}
-                        className="bg-gray-200 py-3 px-4 rounded-lg hover:bg-gray-300 font-medium text-lg"
+                        className={`${colors.buttonSecondary} py-3 px-4 rounded-lg font-medium text-lg ${colors.textColor}`}
                       >
                         Reset
                       </button>
@@ -431,8 +552,8 @@ const POSSystem = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            {/* centered receipt */}
-            <div className="bg-white border rounded-lg shadow-lg p-8 mb-4 w-3/4 mx-auto">
+            {/* centered receipt - always white background for printing */}
+            <div ref={receiptRef} className="bg-white text-black border rounded-lg shadow-lg p-8 mb-4 w-3/4 mx-auto">
               {/* new receipt layout */}
               <div className="flex mb-8">
                 <div className="w-1/2">
@@ -504,7 +625,7 @@ const POSSystem = () => {
                     <p>{currentTransaction.printed_by}</p>
                   </div>
                   
-                  <div className="mt-44 mb-4">
+                  <div className="mt-48 mb-4">
                     <div className="w-1/2 text-center">
                       <p className="mt-2">Yang Menerima.</p>
                       <div className="border-b pb-16"></div>
@@ -512,7 +633,7 @@ const POSSystem = () => {
                   </div>
                 </div>
 
-                {/* aotals and signature fields */}
+                {/* totals and signature fields */}
                 <div className="w-1/2 text-right">
                   <div className="flex justify-end mb-1">
                     <span className="w-28 text-left">TOTAL:</span>
@@ -543,11 +664,11 @@ const POSSystem = () => {
                   <div className="flex mt-48 mb-2 justify-end">
                     <div className="flex w-full">
                       <div className="w-1/2 text-center pr-2">
-                        <p className="mt-2">Yang Menyetujui.</p>
+                        <p>Yang Menyetujui.</p>
                         <div className="border-b pb-16"></div>
                       </div>
                       <div className="w-1/2 text-center pl-2">
-                        <p className="mt-2">Yang Membuat.</p>
+                        <p>Yang Membuat.</p>
                         <div className="border-b pb-16"></div>
                       </div>
                     </div>
@@ -556,7 +677,7 @@ const POSSystem = () => {
               </div>
             </div>
             
-            {/* buttons*/}
+            {/* buttons - use dark mode colors if enabled */}
             <div className="flex justify-center space-x-4 w-3/4">
               <button
                 onClick={printReceipt}
