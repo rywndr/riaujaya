@@ -15,7 +15,7 @@ const Receipt = ({
   
   return (
     <div className="flex flex-col items-center">
-      <div ref={receiptRef} className="bg-white text-black border rounded-lg shadow-lg p-8 mb-4 w-3/4 mx-auto">
+      <div ref={receiptRef} className="bg-white text-black border rounded-lg shadow-lg p-8 mb-4 w-full mx-auto">
         <div className="flex mb-8">
           <div className="w-1/2">
             <div className="text-2xl font-bold">PT.RIAUJAYA CEMERLANG</div>
@@ -27,8 +27,8 @@ const Receipt = ({
             </div>
           </div>
           
-          {/* customer info*/}
-          <div className="w-1/2 pl-24">
+          {/* customer info */}
+          <div className="w-1/2 pl-12">
             <div className="mt-3">
               <div><strong>Kepada:</strong> {currentTransaction.customer_name}</div>
               <div className="ml-16">TANJUNGPINANG</div>
@@ -40,44 +40,46 @@ const Receipt = ({
         </div>
         
         {/* table spans full width */}
-        <table className="w-full mb-4">
-          <thead>
-            <tr className="border-b border-t">
-              <th className="text-center py-1 w-8">NO</th>
-              <th className="text-left">KODE BARANG</th>
-              <th className="text-left">NAMA BARANG</th>
-              <th className="text-right">JUMLAH</th>
-              <th className="text-right">BONUS</th>
-              <th className="text-right">@HARGA</th>
-              <th className="text-right">HARGA</th>
-              <th className="text-right">DISCOUNT</th>
-              <th className="text-right">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cart.map((item, index) => {
-              const discountAmount = (item.discount_percentage / 100) * (item.quantity * item.unit_price);
-              return (
-                <tr key={item.product_id} className="border-b">
-                  <td className="text-center">{index + 1}</td>
-                  <td>{item.product_code}</td>
-                  <td>{item.product_name}</td>
-                  <td className="text-right">{item.quantity} PCS</td>
-                  <td className="text-right"></td>
-                  <td className="text-right">{formatCurrency(item.unit_price)}</td>
-                  <td className="text-right">{formatCurrency(item.unit_price)}</td>
-                  <td className="text-right">{formatDiscount(item.discount_percentage)}</td>
-                  <td className="text-right">{formatCurrency(item.total_price)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full mb-4 table-fixed">
+            <thead>
+              <tr className="border-b border-t">
+                <th className="text-center py-1 w-10">NO</th>
+                <th className="text-left w-24">KODE</th>
+                <th className="text-left w-48">NAMA BARANG</th>
+                <th className="text-right w-16">JUMLAH</th>
+                <th className="text-right w-16">BONUS</th>
+                <th className="text-right w-20">@HARGA</th>
+                <th className="text-right w-24">HARGA</th>
+                <th className="text-right w-20">DISCOUNT</th>
+                <th className="text-right w-24">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cart.map((item, index) => {
+                const discountAmount = (item.discount_percentage / 100) * (item.quantity * item.unit_price);
+                return (
+                  <tr key={item.product_id} className="border-b">
+                    <td className="text-center">{index + 1}</td>
+                    <td className="truncate">{item.product_code}</td>
+                    <td className="truncate">{item.product_name}</td>
+                    <td className="text-right">{item.quantity} PCS</td>
+                    <td className="text-right"></td>
+                    <td className="text-right">{formatCurrency(item.unit_price)}</td>
+                    <td className="text-right">{formatCurrency(item.unit_price)}</td>
+                    <td className="text-right">{formatDiscount(item.discount_percentage)}</td>
+                    <td className="text-right">{formatCurrency(item.total_price)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         
         {/* section notes on left, totals and signatures on right */}
-        <div className="flex">
+        <div className="flex flex-wrap">
           {/* notes and printed by */}
-          <div className="w-1/2">
+          <div className="w-full md:w-1/2">
             <div className="mb-4">
               <p className="font-semibold">Catatan:</p>
               <p className="whitespace-pre-line">{currentTransaction.notes || "-"}</p>
@@ -86,7 +88,7 @@ const Receipt = ({
               <p>{currentTransaction.printed_by}</p>
             </div>
             
-            <div className="mt-48 mb-4">
+            <div className="mt-32 mb-4">
               <div className="w-1/2 text-center">
                 <p className="mt-2">Yang Menerima.</p>
                 <div className="border-b pb-16"></div>
@@ -95,34 +97,34 @@ const Receipt = ({
           </div>
 
           {/* totals and signature fields */}
-          <div className="w-1/2 text-right">
+          <div className="w-full md:w-1/2 text-right">
             <div className="flex justify-end mb-1">
               <span className="w-28 text-left">TOTAL:</span>
-              <span className="w-32 pl-4 text-left">
+              <span className="w-36 pl-4 text-left">
                 {`IDR ${currentTransaction.subtotal.toLocaleString('id-ID')}`}
               </span>
             </div>
             
             <div className="flex justify-end mb-1">
               <span className="w-28 text-left">DISCOUNT:</span>
-              <span className="w-32 pl-4 text-left">
+              <span className="w-36 pl-4 text-left">
                 {currentTransaction.discount > 0
                   ? `IDR ${currentTransaction.discount.toLocaleString('id-ID')}`
                   : 'IDR '}
               </span>
             </div>
             
-            <div className="w-61 ml-auto border-t mt-2 pt-2"></div>
+            <div className="w-64 ml-auto border-t mt-2 pt-2"></div>
             
             <div className="flex justify-end font-bold mb-8">
-              <span className="w-48">GRAND TOTAL:</span>
-              <span className="w-32 pl-4 text-left">
+              <span className="w-28 text-left">GRAND TOTAL:</span>
+              <span className="w-36 pl-4 text-left">
                 {`IDR ${currentTransaction.total.toLocaleString('id-ID')}`}
               </span>
             </div>
             
             {/* signature fields below grand total */}
-            <div className="flex mt-48 mb-2 justify-end">
+            <div className="flex mt-32 mb-2 justify-end">
               <div className="flex w-full">
                 <div className="w-1/2 text-center pr-2">
                   <p>Yang Menyetujui.</p>
@@ -138,7 +140,7 @@ const Receipt = ({
         </div>
       </div>
       
-      <div className="flex justify-center space-x-4 w-3/4">
+      <div className="flex justify-center space-x-4 w-full md:w-3/4">
         <button
           onClick={printReceipt}
           className="bg-green-600 text-white py-3 px-8 rounded-lg hover:bg-green-700 font-medium"
