@@ -35,6 +35,11 @@ export const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+// format price only (without currency symbol)
+export const formatPriceOnly = (price) => {
+  return price.toLocaleString('id-ID');
+};
+
 // format discount percentage
 export const formatDiscount = (percentage) => {
   return `${percentage.toFixed(2)}%`;

@@ -140,7 +140,7 @@ const POSSystem = () => {
     setSalesNumber(newSalesNumber);
     
     // generate printed info
-    const printedByInfo = `Dicetak oleh: ${getCashierName(selectedCashierId)}, ${utils.formatPrintedDate()}`;
+    const printedByInfo = `${getCashierName(selectedCashierId)}, ${utils.formatPrintedDate()}`;
     setPrintedInfo(printedByInfo);
     
     // create new transaction

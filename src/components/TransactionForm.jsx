@@ -102,38 +102,38 @@ const TransactionForm = ({
         ) : (
           <div>
             <div className="overflow-auto max-h-96">
-              <table className="w-full mb-4">
+              <table className="w-full mb-4" style={{ tableLayout: 'fixed' }}>
                 <thead className={colors.tableBg}>
                   <tr className={`border-b ${colors.border}`}>
-                    <th className="text-left py-2 px-2">Item</th>
-                    <th className="text-right px-2">Harga</th>
-                    <th className="text-center px-2">Jumlah</th>
-                    <th className="text-center px-2">Disc %</th>
-                    <th className="text-right px-2">Total</th>
-                    <th className="px-2"></th>
+                    <th className="text-left py-2 px-2 w-[30%]">Item</th>
+                    <th className="text-right px-2 w-[15%]">Harga</th>
+                    <th className="text-center px-2 w-[20%]">Jumlah</th>
+                    <th className="text-center px-2 w-[15%]">Disc %</th>
+                    <th className="text-right px-2 w-[15%]">Total</th>
+                    <th className="px-2 w-[5%]"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {cart.map(item => (
                     <tr key={item.product_id} className={`border-b ${colors.border}`}>
                       <td className="py-3 px-2">{item.product_name}</td>
-                      <td className="text-right px-2">{utils.formatCurrency(item.unit_price)}</td>
+                      <td className="text-right px-2 font-mono">{utils.formatCurrency(item.unit_price)}</td>
                       <td className="text-center px-2">
                         <div className="flex items-center justify-center">
                           <button 
-                            className={`px-2 ${colors.tableBg} rounded-l`}
+                            className={`px-2 py-1 ${colors.tableBg} rounded-l`}
                             onClick={() => cartFunctions.updateQuantity(item.product_id, item.quantity - 1)}
                           >-</button>
                           <span className={`px-3 py-1 ${colors.inputBg}`}>{item.quantity}</span>
                           <button 
-                            className={`px-2 ${colors.tableBg} rounded-r`}
+                            className={`px-2 py-1 ${colors.tableBg} rounded-r`}
                             onClick={() => cartFunctions.updateQuantity(item.product_id, item.quantity + 1)}
                           >+</button>
                         </div>
                       </td>
                       <td className="text-center px-2">
                         <input
-                          type="number"
+                          type="text"
                           value={item.discount_percentage}
                           onChange={(e) => cartFunctions.updateDiscount(item.product_id, Number(e.target.value))}
                           className={`border ${colors.inputBorder} rounded w-16 p-1 text-right ${colors.inputBg} ${colors.textColor}`}
@@ -142,7 +142,7 @@ const TransactionForm = ({
                           step="0.01"
                         />
                       </td>
-                      <td className="text-right px-2">{utils.formatCurrency(item.total_price)}</td>
+                      <td className="text-right px-2 font-mono">{utils.formatCurrency(item.total_price)}</td>
                       <td className="text-right px-2">
                         <button 
                           className="text-red-500 hover:bg-red-50 p-1 rounded"
@@ -158,17 +158,17 @@ const TransactionForm = ({
             <div className={`border-t ${colors.border} pt-4 mt-4`}>
               <div className="flex justify-between mb-2">
                 <span>Subtotal:</span>
-                <span>{utils.formatCurrency(subtotal)}</span>
+                <span className="font-mono w-32 text-right">{utils.formatCurrency(subtotal)}</span>
               </div>
               
               <div className="flex justify-between mb-2">
                 <span>Total Diskon:</span>
-                <span>{utils.formatCurrency(totalDiscount)}</span>
+                <span className="font-mono w-32 text-right">{utils.formatCurrency(totalDiscount)}</span>
               </div>
               
               <div className="flex justify-between font-bold text-lg mb-6">
                 <span>Total:</span>
-                <span>{utils.formatCurrency(total)}</span>
+                <span className="font-mono w-32 text-right">{utils.formatCurrency(total)}</span>
               </div>
               
               <div className="grid grid-cols-2 gap-4">

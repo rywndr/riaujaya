@@ -11,7 +11,7 @@ const Receipt = ({
   if (!currentTransaction) return null;
   
   // destructure formatting utilities from utils
-  const { formatCurrency, formatDiscount } = utils;
+  const { formatCurrency, formatDiscount, formatPriceOnly } = utils;
   
   return (
     <div className="flex flex-col items-center">
@@ -22,19 +22,37 @@ const Receipt = ({
             <div className="text-sm">JL. NANGKA/TUANKU TAMBUSAI Blok - No.18 J.K.L RT:000 RW:000</div>
             <div className="text-sm">Kel.TAMPAN Kec.PAYUNG SEKAKI Kota/Kab.PE</div>
             <div className="mt-4">
-              <div><strong>SALES NO:</strong> {currentTransaction.sales_number}</div>
-              <div><strong>TANGGAL:</strong> {new Date(currentTransaction.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
+              <div className="flex">
+                <span className="w-24 inline-block"><strong>SALES NO</strong></span>
+                <span className="inline-block"><strong>:</strong> {currentTransaction.sales_number}</span>
+              </div>
+              <div className="flex">
+                <span className="w-24 inline-block"><strong>TANGGAL</strong></span>
+                <span className="inline-block"><strong>:</strong> {new Date(currentTransaction.transaction_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+              </div>
             </div>
           </div>
           
           {/* customer info */}
-          <div className="w-1/2 pl-12">
+          <div className="w-1/2 pl-48">
             <div className="mt-3">
-              <div><strong>Kepada:</strong> {currentTransaction.customer_name}</div>
-              <div className="ml-16">TANJUNGPINANG</div>
+              <div className="flex">
+                <span className="w-24 inline-block"><strong>Kepada</strong></span>
+                <span className="inline-block"><strong>:</strong> {currentTransaction.customer_name}</span>
+              </div>
+              <div className="flex">
+                <span className="w-24 inline-block"></span>
+                <span className="ml-[10px]">TANJUNGPINANG</span>
+              </div>
               <div>&nbsp;</div>
-              <div><strong>Telepon:</strong> {currentTransaction.customer_phone}</div>
-              <div><strong>Sales:</strong> {currentTransaction.cashier_name}</div>
+              <div className="flex">
+                <span className="w-24 inline-block"><strong>Telepon</strong></span>
+                <span className="inline-block"><strong>:</strong> {currentTransaction.customer_phone}</span>
+              </div>
+              <div className="flex">
+                <span className="w-24 inline-block"><strong>Sales</strong></span>
+                <span className="inline-block"><strong>:</strong> {currentTransaction.cashier_name}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -58,17 +76,19 @@ const Receipt = ({
             <tbody>
               {cart.map((item, index) => {
                 const discountAmount = (item.discount_percentage / 100) * (item.quantity * item.unit_price);
+                const isLastItem = index === cart.length - 1;
+                
                 return (
-                  <tr key={item.product_id} className="border-b">
+                  <tr key={item.product_id} className={isLastItem ? "border-b" : ""}>
                     <td className="text-center">{index + 1}</td>
                     <td className="truncate">{item.product_code}</td>
                     <td className="truncate">{item.product_name}</td>
                     <td className="text-right">{item.quantity} PCS</td>
                     <td className="text-right"></td>
-                    <td className="text-right">{formatCurrency(item.unit_price)}</td>
-                    <td className="text-right">{formatCurrency(item.unit_price)}</td>
+                    <td className="text-right">{formatPriceOnly(item.unit_price)}</td>
+                    <td className="text-right">{formatPriceOnly(item.unit_price)}</td>
                     <td className="text-right">{formatDiscount(item.discount_percentage)}</td>
-                    <td className="text-right">{formatCurrency(item.total_price)}</td>
+                    <td className="text-right">{formatPriceOnly(item.total_price)}</td>
                   </tr>
                 );
               })}
@@ -81,33 +101,31 @@ const Receipt = ({
           {/* notes and printed by */}
           <div className="w-full md:w-1/2">
             <div className="mb-4">
-              <p className="font-semibold">Catatan:</p>
-              <p className="whitespace-pre-line">{currentTransaction.notes || "-"}</p>
-            </div>
-            <div>
-              <p>{currentTransaction.printed_by}</p>
-            </div>
-            
-            <div className="mt-32 mb-4">
-              <div className="w-1/2 text-center">
-                <p className="mt-2">Yang Menerima.</p>
-                <div className="border-b pb-16"></div>
+              <div className="flex">
+                <span className="w-24 inline-block"><strong>Catatan</strong></span>
+                <span className="inline-block"><strong>:</strong> {currentTransaction.notes || ""}</span>
               </div>
+            </div>
+            <div className="flex">
+              <span className="w-24 inline-block"><strong>Printed By</strong></span>
+              <span className="inline-block"><strong>:</strong> {currentTransaction.printed_by}</span>
             </div>
           </div>
 
           {/* totals and signature fields */}
           <div className="w-full md:w-1/2 text-right">
             <div className="flex justify-end mb-1">
-              <span className="w-28 text-left">TOTAL:</span>
-              <span className="w-36 pl-4 text-left">
+              <span className="w-28 text-left">TOTAL</span>
+              <span className="w-6 text-center">:</span>
+              <span className="w-36 text-left">
                 {`IDR ${currentTransaction.subtotal.toLocaleString('id-ID')}`}
               </span>
             </div>
             
             <div className="flex justify-end mb-1">
-              <span className="w-28 text-left">DISCOUNT:</span>
-              <span className="w-36 pl-4 text-left">
+              <span className="w-28 text-left">DISCOUNT</span>
+              <span className="w-6 text-center">:</span>
+              <span className="w-36 text-left">
                 {currentTransaction.discount > 0
                   ? `IDR ${currentTransaction.discount.toLocaleString('id-ID')}`
                   : 'IDR '}
@@ -117,24 +135,33 @@ const Receipt = ({
             <div className="w-64 ml-auto border-t mt-2 pt-2"></div>
             
             <div className="flex justify-end font-bold mb-8">
-              <span className="w-28 text-left">GRAND TOTAL:</span>
-              <span className="w-36 pl-4 text-left">
+              <span className="w-28 text-left">GRAND TOTAL</span>
+              <span className="w-6 text-center">:</span>
+              <span className="w-36 text-left">
                 {`IDR ${currentTransaction.total.toLocaleString('id-ID')}`}
               </span>
             </div>
+          </div>
+        </div>
+        
+        <div className="flex mt-28 w-full">
+          <div className="w-1/3 text-center">
+            <p>Yang Menerima.</p>
+            <div className="h-20"></div>
+            <div className="w-32 mx-auto border-b"></div>
+          </div>
+          
+          <div className="w-2/3 flex justify-end">
+            <div className="w-1/2 text-center pr-4">
+              <p>Yang Menyetujui.</p>
+              <div className="h-20"></div>
+              <div className="w-32 mx-auto border-b"></div>
+            </div>
             
-            {/* signature fields below grand total */}
-            <div className="flex mt-32 mb-2 justify-end">
-              <div className="flex w-full">
-                <div className="w-1/2 text-center pr-2">
-                  <p>Yang Menyetujui.</p>
-                  <div className="border-b pb-16"></div>
-                </div>
-                <div className="w-1/2 text-center pl-2">
-                  <p>Yang Membuat.</p>
-                  <div className="border-b pb-16"></div>
-                </div>
-              </div>
+            <div className="w-1/2 text-center">
+              <p>Yang Membuat.</p>
+              <div className="h-20"></div>
+              <div className="w-32 mx-auto border-b"></div>
             </div>
           </div>
         </div>
