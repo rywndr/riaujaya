@@ -11,9 +11,9 @@ const DarkModeToggle = ({ darkMode, toggleDarkMode }) => {
       aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
     >
       {darkMode ? (
-        <Moon className="text-white" size={20} />
+          <Sun className="text-white" size={20} />
       ) : (
-        <Sun className="text-gray-900" size={20} />
+          <Moon className="text-gray-900" size={20} />
       )}
     </button>
   );
