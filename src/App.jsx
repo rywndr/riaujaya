@@ -1,42 +1,31 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import POSSystem from './components/POSSystem';
+import TransactionHistory from './components/TransactionHistory';
+import Navigation from './components/Navigation';
 import Login from './components/Auth/Login';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import useColorClasses from './hooks/useColorClasses';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// main app content with auth check
-const AppContent = () => {
-  const { user, loading } = useAuth();
-  const { colors, darkMode } = useColorClasses(false);
-  
-  // show loading state
-  if (loading) {
-    return (
-      <div className={`w-full min-h-screen ${colors.appBg} flex items-center justify-center transition-colors duration-300`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className={colors.textColor}>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  // show login if no user is authenticated
-  if (!user) {
-    return <Login colors={colors} />;
-  }
-  
-  // show POS system if user is authenticated
-  return <POSSystem />;
-};
-
-// wrap app with auth provider
-function App() {
+// app with routing and auth context
+const App = () => {
   return (
     <AuthProvider>
-      <AppContent />
+      <Router>
+        <Routes>
+          {/* public routes */}
+          <Route path="/login" element={<Login />} />
+          
+          {/* protected routes */}
+          <Route path="/" element={<ProtectedRoute><Navigation /><POSSystem /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><Navigation /><TransactionHistory /></ProtectedRoute>} />
+          
+          {/* fallback redirect */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;
