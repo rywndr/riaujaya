@@ -220,7 +220,7 @@ const Dashboard = () => {
                     'Multiple Services';
                   
                   return (
-                    <tr key={transaction.id} className={`border-b ${colors.border} hover:bg-gray-50`}>
+                    <tr key={transaction.id} className={`border-b ${colors.border} ${colors.tableText} hover:bg-gray-50`}>
                       <td className="py-3 px-4">{transaction.sales_number}</td>
                       <td className="py-3 px-4">{formatDate(transaction.transaction_date)}</td>
                       <td className="py-3 px-4">{transaction.customer_name}</td>
