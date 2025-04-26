@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import useColorClasses from '../../hooks/useColorClasses';
 
 const Login = () => {
@@ -16,6 +17,8 @@ const Login = () => {
   // get auth context
   const { signIn, resetPassword, loading, error } = useAuth();
 
+  const navigate = useNavigate();
+
   // handle login submit
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,6 +33,9 @@ const Login = () => {
       // reset form on success
       setEmail('');
       setPassword('');
+
+      // redirect to app
+      navigate('/', { replace: true });
     }
   };
 
