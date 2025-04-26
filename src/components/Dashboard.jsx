@@ -201,8 +201,8 @@ const Dashboard = () => {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className={colors.tableBg}>
-              <tr className={`border-b ${colors.border}`}>
+            <thead className={`${colors.tableBg}`}>
+              <tr className={`border-b ${colors.border} ${colors.tableText} `}>
                 <th className="text-left py-3 px-4">No. Transaksi</th>
                 <th className="text-left py-3 px-4">Tanggal</th>
                 <th className="text-left py-3 px-4">Pelanggan</th>

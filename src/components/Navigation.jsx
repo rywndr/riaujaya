@@ -72,7 +72,7 @@ const Navigation = ({ colors, darkMode, toggleDarkMode }) => {
               }`}
             >
               <Clock className="mr-2 h-5 w-5" />
-              Riwayat Transaksi
+              Transaction History
             </Link>
           </div>
 
@@ -137,7 +137,7 @@ const Navigation = ({ colors, darkMode, toggleDarkMode }) => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <Clock className="mr-2 h-5 w-5" />
-                Riwayat Transaksi
+                Transaction History
               </Link>
             </div>
           </div>

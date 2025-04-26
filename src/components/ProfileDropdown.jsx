@@ -53,7 +53,7 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
           
           {/* theme toggle  */}
           <div className="px-4 py-2 border-b border-opacity-30 border-gray-400 flex justify-between items-center">
-            <span className={`text-sm ${colors.textColor}`}>Dark Mode</span>
+            <span className={`text-sm ${colors.textColor}`}>{ darkMode ? "Light" : "Dark"  }</span>
             <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
           </div>
           

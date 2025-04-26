@@ -11,6 +11,7 @@ const useColorClasses = (initialMode = false) => {
     textMuted: darkMode ? 'text-gray-300' : 'text-gray-500',
     border: darkMode ? 'border-gray-700' : 'border-gray-200',
     tableBg: darkMode ? 'bg-gray-700' : 'bg-gray-50',
+    tableText: darkMode ? 'text-gray-200' : 'text-gray-800',
     tableHover: darkMode ? 'hover:bg-gray-600' : 'hover:bg-blue-50',
     inputBg: darkMode ? 'bg-gray-700' : 'bg-white',
     inputBorder: darkMode ? 'border-gray-600' : 'border-gray-300',

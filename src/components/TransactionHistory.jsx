@@ -160,7 +160,7 @@ const TransactionHistory = () => {
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead className={`${colors.tableBg}`}>
-                <tr>
+                <tr className={`border-b ${colors.border} ${colors.tableText} `}>
                   <th className="px-4 py-2 text-left cursor-pointer" onClick={() => handleSort('sales_number')}>
                     <div className="flex items-center">
                       <span>No. Transaksi</span>
