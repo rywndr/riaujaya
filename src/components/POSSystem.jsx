@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import TransactionForm from './TransactionForm';
 import Receipt from './Receipt';
-import DarkModeToggle from './DarkModeToggle';
+import ProfileDropdown from './ProfileDropdown'; 
 import useColorClasses from '../hooks/useColorClasses';
+import { useAuth } from '../context/AuthContext';
 import db from '../data/database';
 import * as formatters from '../utils/formatters';
 import * as calculations from '../utils/calculations';
 
 const POSSystem = () => {
+  // get auth context for user info and sign out
+  const { user, signOut } = useAuth();
+
   // combine utils into a single object for ease of use
   const utils = {
     ...formatters,
@@ -257,8 +261,13 @@ const POSSystem = () => {
         <div className="flex justify-between items-center mb-4">
           <h1 className={`text-3xl font-bold ${colors.textColor}`}>PT.RIAUJAYA CEMERLANG SUZUKI</h1>
           
-          {/* pass dark mode state and toggle function from the hook */}
-          <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+          <ProfileDropdown 
+            user={user} 
+            signOut={signOut} 
+            darkMode={darkMode} 
+            toggleDarkMode={toggleDarkMode} 
+            colors={colors} 
+          />
         </div>
         
         {showReceipt ? (
