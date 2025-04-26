@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useOutletContext } from 'react-router-dom';
 import db from '../data/database';
 import useColorClasses from '../hooks/useColorClasses';
 import ProfileDropdown from './ProfileDropdown';
 
 const TransactionHistory = () => {
-  // get auth context for user info and sign out
+  // get shared colors and dark mode from layout context
   const { user, signOut } = useAuth();
 
-  // get color classes and dark mode functionality from custom hook
-  const { colors, darkMode, toggleDarkMode } = useColorClasses(false);
+  const { colors } = useOutletContext();
 
   // states
   const [transactions, setTransactions] = useState([]);
@@ -131,18 +131,6 @@ const TransactionHistory = () => {
   return (
     <div className={`w-full min-h-screen ${colors.appBg} transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className={`text-3xl font-bold ${colors.textColor}`}>PT.RIAUJAYA CEMERLANG SUZUKI</h1>
-          
-          <ProfileDropdown 
-            user={user} 
-            signOut={signOut} 
-            darkMode={darkMode} 
-            toggleDarkMode={toggleDarkMode} 
-            colors={colors} 
-          />
-        </div>
-        
         <div className={`rounded-lg ${colors.cardBg} shadow-md p-4 mb-6`}>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
             <h2 className={`text-xl font-semibold ${colors.textColor} mb-2 md:mb-0`}>Riwayat Transaksi</h2>

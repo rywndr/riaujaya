@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import useColorClasses from '../hooks/useColorClasses';
+import { useAuth } from '../context/AuthContext';
 import ProfileDropdown from './ProfileDropdown';
 import {
   Gauge,
@@ -12,10 +12,12 @@ import {
 } from 'lucide-react';
 
 // navigation bar for the app
-const Navigation = ({ user, signOut, darkMode, toggleDarkMode }) => {
-  const { colors } = useColorClasses(false);
+const Navigation = ({ colors, darkMode, toggleDarkMode }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // get auth context for user info and sign out
+  const { user, signOut } = useAuth();
 
   // check if the current path matches
   const isActive = (path) => location.pathname === path;
@@ -26,7 +28,7 @@ const Navigation = ({ user, signOut, darkMode, toggleDarkMode }) => {
   };
 
   return (
-    <nav className={`${colors.cardBg} shadow-md mb-4`}>
+    <nav className={`${colors.cardBg} shadow-md`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* logo and company name */}
@@ -74,19 +76,19 @@ const Navigation = ({ user, signOut, darkMode, toggleDarkMode }) => {
             </Link>
           </div>
 
-          {/* user profile dropdown */}
-          <div className="hidden md:block">
-            <ProfileDropdown
-              user={user}
-              signOut={signOut}
-              darkMode={darkMode}
-              toggleDarkMode={toggleDarkMode}
-              colors={colors}
-            />
+          {/* user profile dropdown - desktop */}
+          <div className="flex items-center">
+          <ProfileDropdown 
+            user={user} 
+            signOut={signOut} 
+            darkMode={darkMode} 
+            toggleDarkMode={toggleDarkMode} 
+            colors={colors} 
+          />
           </div>
 
           {/* mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden ml-2">
             <button
               onClick={toggleMobileMenu}
               className={`p-2 rounded-md ${colors.textColor} hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none`}
@@ -137,15 +139,6 @@ const Navigation = ({ user, signOut, darkMode, toggleDarkMode }) => {
                 <Clock className="mr-2 h-5 w-5" />
                 Riwayat Transaksi
               </Link>
-              {/* mobile profile dropdown */}
-              <div className="border-t border-gray-200 my-2"></div>
-              <ProfileDropdown
-                user={user}
-                signOut={signOut}
-                darkMode={darkMode}
-                toggleDarkMode={toggleDarkMode}
-                colors={colors}
-              />
             </div>
           </div>
         )}
@@ -155,4 +148,3 @@ const Navigation = ({ user, signOut, darkMode, toggleDarkMode }) => {
 };
 
 export default Navigation;
-

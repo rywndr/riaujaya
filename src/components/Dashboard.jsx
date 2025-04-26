@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import useColorClasses from '../hooks/useColorClasses';
 import db from '../data/database';
 import { 
@@ -13,7 +13,7 @@ import {
 
 // Dashboard component for RJC motorcycle service
 const Dashboard = () => {
-  const { colors } = useColorClasses(false);
+  const { colors } = useOutletContext();
   const navigate = useNavigate();
   
   // State for dashboard data
