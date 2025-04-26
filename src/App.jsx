@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import POSSystem from './components/POSSystem';
 import TransactionHistory from './components/TransactionHistory';
 import Navigation from './components/Navigation';
+import Dashboard from './components/Dashboard';
 import Login from './components/Auth/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -17,7 +18,8 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           
           {/* protected routes */}
-          <Route path="/" element={<ProtectedRoute><Navigation /><POSSystem /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute><Navigation /><Dashboard /></ProtectedRoute>} />
+          <Route path="/pos" element={<ProtectedRoute><Navigation /><POSSystem /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><Navigation /><TransactionHistory /></ProtectedRoute>} />
           
           {/* fallback redirect */}
