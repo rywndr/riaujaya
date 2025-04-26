@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import useColorClasses from '../../hooks/useColorClasses';
 
-const Login = ({ colors }) => {
+const Login = () => {
   // form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
+
+  // get color classes and dark mode functionality from custom hook
+  const { colors } = useColorClasses(false);
 
   // get auth context
   const { signIn, resetPassword, loading, error } = useAuth();
