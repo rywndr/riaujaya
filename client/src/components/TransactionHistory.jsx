@@ -23,6 +23,7 @@ const TransactionHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState({});
   const [error, setError] = useState(null);
+
   // receipt viewing states
   const [viewingReceipt, setViewingReceipt] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);

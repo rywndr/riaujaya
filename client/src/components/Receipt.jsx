@@ -1,4 +1,5 @@
 import React from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 const Receipt = ({ 
   receiptRef, 
@@ -12,6 +13,9 @@ const Receipt = ({
   
   // destructure formatting utilities from utils
   const { formatCurrency, formatDiscount, formatPriceOnly } = utils;
+
+  // get shared color classes from context
+  const { colors } = useOutletContext();
   
   return (
     <div className="flex flex-col items-center">
@@ -168,18 +172,18 @@ const Receipt = ({
       </div>
       
       <div className="flex justify-center space-x-4 w-full md:w-3/4">
-        <button
-          onClick={printReceipt}
-          className="bg-green-600 text-white py-3 px-8 rounded-lg hover:bg-green-700 font-medium"
-        >
-          Cetak Struk
-        </button>
         
         <button
           onClick={resetTransaction}
-          className="bg-blue-600 text-white py-3 px-8 rounded-lg hover:bg-blue-700 font-medium"
+          className={`px-3 py-3 rounded-lg ${colors.buttonSecondary} font-medium transition-colors duration-200`}
         >
           Transaksi Baru
+        </button>
+        <button
+          onClick={printReceipt}
+          className={`px-3 py-3 rounded-lg ${colors.buttonPrimary} font-medium transition-colors duration-200`}
+        >
+          Cetak Struk
         </button>
       </div>
     </div>
