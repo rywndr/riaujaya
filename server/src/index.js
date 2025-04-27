@@ -64,6 +64,62 @@ app.post('/api/cashiers', async (req, res) => {
   }
 });
 
+// new endpoints for cashiers
+app.put('/api/cashiers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'name is required' });
+    }
+    
+    const [result] = await pool.query(
+      'UPDATE cashiers SET name = ? WHERE id = ?',
+      [name, id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'cashier not found' });
+    }
+    
+    res.json({ id: parseInt(id), name });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/cashiers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // check if cashier is used in any transactions
+    const [transactions] = await pool.query(
+      'SELECT COUNT(*) as count FROM transactions WHERE cashier_id = ?',
+      [id]
+    );
+    
+    if (transactions[0].count > 0) {
+      return res.status(400).json({ 
+        error: 'cannot delete cashier with associated transactions' 
+      });
+    }
+    
+    const [result] = await pool.query(
+      'DELETE FROM cashiers WHERE id = ?',
+      [id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'cashier not found' });
+    }
+    
+    res.json({ message: 'cashier deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // products endpoints
 app.get('/api/products', async (req, res) => {
   try {
@@ -97,11 +153,154 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
+// new endpoints for products
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, unit_price, code } = req.body;
+    
+    if (!name || !unit_price || !code) {
+      return res.status(400).json({ error: 'name, unit_price, and code are required' });
+    }
+    
+    const [result] = await pool.query(
+      'UPDATE products SET name = ?, unit_price = ?, code = ? WHERE id = ?',
+      [name, unit_price, code, id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'product not found' });
+    }
+    
+    res.json({ 
+      id: parseInt(id), 
+      name, 
+      unit_price, 
+      code 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // check if product is used in any transaction items
+    const [transactionItems] = await pool.query(
+      'SELECT COUNT(*) as count FROM transaction_items WHERE product_id = ?',
+      [id]
+    );
+    
+    if (transactionItems[0].count > 0) {
+      return res.status(400).json({ 
+        error: 'cannot delete product with associated transactions' 
+      });
+    }
+    
+    const [result] = await pool.query(
+      'DELETE FROM products WHERE id = ?',
+      [id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'product not found' });
+    }
+    
+    res.json({ message: 'product deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // customers endpoints
 app.get('/api/customers', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM customers');
     res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// new endpoints for customers
+app.post('/api/customers', async (req, res) => {
+  try {
+    const { name, phone } = req.body;
+    if (!name || !phone) {
+      return res.status(400).json({ error: 'name and phone are required' });
+    }
+    
+    const [result] = await pool.query(
+      'INSERT INTO customers (name, phone) VALUES (?, ?)',
+      [name, phone]
+    );
+    
+    res.status(201).json({ 
+      id: result.insertId,
+      name,
+      phone
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/customers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone } = req.body;
+    
+    if (!name || !phone) {
+      return res.status(400).json({ error: 'name and phone are required' });
+    }
+    
+    const [result] = await pool.query(
+      'UPDATE customers SET name = ?, phone = ? WHERE id = ?',
+      [name, phone, id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'customer not found' });
+    }
+    
+    res.json({ 
+      id: parseInt(id), 
+      name, 
+      phone 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/customers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // check if customer is used in any transactions
+    const [transactions] = await pool.query(
+      'SELECT COUNT(*) as count FROM transactions WHERE customer_id = ?',
+      [id]
+    );
+    
+    if (transactions[0].count > 0) {
+      return res.status(400).json({ 
+        error: 'cannot delete customer with associated transactions' 
+      });
+    }
+    
+    const [result] = await pool.query(
+      'DELETE FROM customers WHERE id = ?',
+      [id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'customer not found' });
+    }
+    
+    res.json({ message: 'customer deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -278,6 +477,176 @@ app.post('/api/transactions', async (req, res) => {
       transaction: transactionData[0],
       items: transactionItems
     });
+  } catch (error) {
+    // rollback in case of error
+    await connection.rollback();
+    res.status(500).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// update transaction endpoint
+app.put('/api/transactions/:id', async (req, res) => {
+  // start a transaction to ensure data consistency
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+    
+    const transactionId = req.params.id;
+    const {
+      sales_number,
+      cashier_id,
+      customer_name,
+      customer_phone,
+      total,
+      notes,
+      printed_by,
+      cart
+    } = req.body;
+    
+    // validate required fields
+    if (!sales_number || !cashier_id || !customer_name || cart.length === 0) {
+      return res.status(400).json({ 
+        error: 'sales_number, cashier_id, customer_name and cart items are required' 
+      });
+    }
+    
+    // make sure transaction exists
+    const [existingTransaction] = await connection.query(
+      'SELECT id FROM transactions WHERE id = ?',
+      [transactionId]
+    );
+    if (existingTransaction.length === 0) {
+      return res.status(404).json({ error: 'transaction not found' });
+    }
+    
+    // handle customer info
+    let customer_id = null;
+    if (customer_phone) {
+      // check if customer exists
+      const [existingCustomers] = await connection.query(
+        'SELECT id FROM customers WHERE phone = ?',
+        [customer_phone]
+      );
+      
+      if (existingCustomers.length > 0) {
+        customer_id = existingCustomers[0].id;
+      } else {
+        // create new customer
+        const [customerResult] = await connection.query(
+          'INSERT INTO customers (name, phone) VALUES (?, ?)',
+          [customer_name, customer_phone]
+        );
+        customer_id = customerResult.insertId;
+      }
+    }
+    
+    // update transaction
+    await connection.query(
+      `UPDATE transactions 
+       SET sales_number = ?, 
+           cashier_id = ?, 
+           customer_id = ?, 
+           total_amount = ?, 
+           notes = ?, 
+           printed_by = ? 
+       WHERE id = ?`,
+      [sales_number, cashier_id, customer_id, total, notes, printed_by, transactionId]
+    );
+    
+    // delete existing items
+    await connection.query(
+      'DELETE FROM transaction_items WHERE transaction_id = ?',
+      [transactionId]
+    );
+    
+    // insert updated items
+    for (const item of cart) {
+      const itemSubtotal = item.quantity * item.unit_price;
+      
+      await connection.query(
+        `INSERT INTO transaction_items 
+         (transaction_id, product_id, quantity, unit_price, discount_percentage, subtotal) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          transactionId,
+          item.product_id,
+          item.quantity, 
+          item.unit_price,
+          item.discount_percentage || 0,
+          itemSubtotal
+        ]
+      );
+    }
+    
+    // commit the transaction
+    await connection.commit();
+    
+    // fetch the updated transaction with items and names
+    const [transactionData] = await connection.query(
+      `SELECT t.*, c.name as cashier_name, 
+       COALESCE(cust.name, 'KONSUMEN BENGKEL') as customer_name, 
+       cust.phone as customer_phone
+       FROM transactions t
+       LEFT JOIN cashiers c ON t.cashier_id = c.id
+       LEFT JOIN customers cust ON t.customer_id = cust.id
+       WHERE t.id = ?`,
+      [transactionId]
+    );
+    
+    const [transactionItems] = await connection.query(
+      `SELECT ti.*, p.name as product_name, p.code as product_code
+       FROM transaction_items ti
+       JOIN products p ON ti.product_id = p.id
+       WHERE ti.transaction_id = ?`,
+      [transactionId]
+    );
+    
+    res.json({
+      transaction: transactionData[0],
+      items: transactionItems
+    });
+  } catch (error) {
+    // rollback in case of error
+    await connection.rollback();
+    res.status(500).json({ error: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
+// delete transaction endpoint
+app.delete('/api/transactions/:id', async (req, res) => {
+  // start a transaction to ensure data consistency
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+    
+    const transactionId = req.params.id;
+    
+    // delete transaction items first (foreign key constraint)
+    await connection.query(
+      'DELETE FROM transaction_items WHERE transaction_id = ?',
+      [transactionId]
+    );
+    
+    // delete transaction
+    const [result] = await connection.query(
+      'DELETE FROM transactions WHERE id = ?',
+      [transactionId]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'transaction not found' });
+    }
+    
+    // commit the transaction
+    await connection.commit();
+    
+    res.json({ message: 'transaction deleted successfully' });
   } catch (error) {
     // rollback in case of error
     await connection.rollback();
