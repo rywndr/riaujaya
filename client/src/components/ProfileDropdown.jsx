@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User, LogOut, Sun, Moon, ChevronDown } from 'lucide-react';
+import { User, LogOut, Sun, Moon, ChevronDown, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import DarkModeToggle from './DarkModeToggle';
 
 const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) => {
@@ -36,7 +37,7 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
       <button 
         onClick={toggleDropdown}
         className={`flex items-center gap-2 px-3 py-2 rounded-full ${colors.buttonOutline} ${colors.transition}`}
-        aria-label="User menu"
+        aria-label="user menu"
       >
         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${colors.buttonSecondary}`}>
           <User size={16} className={colors.textColor} />
@@ -57,7 +58,7 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
                       animate-in fade-in duration-200 slide-in-from-top-5`}
         >
           {/* user profile section */}
-          <div className="px-4 py-3 ${colors.divider}">
+          <div className={`px-4 py-3 border-b ${colors.divider}`}>
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colors.buttonSecondary}`}>
                 <User size={18} className={colors.textColor} />
@@ -66,15 +67,22 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
                 <p className={`text-sm font-medium ${colors.textColor}`}>
                   {user?.email}
                 </p>
-                <p className={`text-xs ${colors.textMuted}`}>
-                  Account Settings
-                </p>
+                <Link
+                  to="/account"
+                  onClick={() => setIsOpen(false)}
+                  className={`w-full flex items-center rounded-lg
+                              ${colors.transition}`}
+                >
+                    <p className={`text-xs hover:underline ${colors.textMuted}`}>
+                      Account settings
+                    </p>
+                </Link>
               </div>
             </div>
           </div>
           
           {/* theme toggle */}
-          <div className="px-4 py-2 ${colors.divider}">
+          <div className={`px-4 py-2 border-b ${colors.divider}`}>
             <div className="flex justify-between items-center py-1">
               <div className="flex items-center gap-2">
                 {darkMode ? 
@@ -88,9 +96,9 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
               <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             </div>
           </div>
-          
+
           {/* sign out */}
-          <div className="px-4 py-2">
+          <div className="px-4 py-1">
             <button
               onClick={handleSignOut}
               className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm 
@@ -98,7 +106,7 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
                           ${darkMode ? 'hover:border-red-500/30 hover:bg-red-500/10' : 'hover:border-red-500/20 hover:bg-red-50'}`}
             >
               <LogOut size={16} />
-              <span>Sign Out</span>
+              <span>Sign out</span>
             </button>
           </div>
         </div>
