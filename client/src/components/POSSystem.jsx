@@ -5,6 +5,7 @@ import Receipt from './Receipt';
 import * as formatters from '../utils/formatters';
 import * as calculations from '../utils/calculations';
 import * as apiService from '../services/apiService';
+import { printReceipt, prepareReceiptData } from '../utils/receiptUtils';
 
 const POSSystem = () => {
   // get shared colors and dark mode from layout context
@@ -197,8 +198,8 @@ const POSSystem = () => {
       // send transaction to api
       const result = await apiService.createTransaction(transactionData);
       
-      // create transaction object for receipt using api response
-      const newTransaction = {
+      // create transaction object for receipt using api response and our utility
+      const transaction = {
         id: result.transaction.id,
         sales_number: newSalesNumber,
         transaction_date: result.transaction.created_at || new Date().toISOString(),
@@ -207,13 +208,16 @@ const POSSystem = () => {
         cashier_name: getCashierName(selectedCashierId),
         subtotal,
         discount: totalDiscount,
-        total,
+        total_amount: total,
         notes: notes,
         printed_by: printedByInfo
       };
       
+      // use prepareReceiptData utility to format transaction data
+      const { receiptTransaction } = prepareReceiptData(transaction, cart);
+      
       // set current transaction for receipt
-      setCurrentTransaction(newTransaction);
+      setCurrentTransaction(receiptTransaction);
       setShowReceipt(true);
     } catch (error) {
       alert(`transaction error: ${error.message}`);
@@ -221,64 +225,6 @@ const POSSystem = () => {
     }
   };
 
-  // print receipt function
-  const printReceipt = () => {
-    if (!receiptRef.current) return;
-
-    // crude but effective mobile check
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-    // open the print window synchronously on click
-    const printWindow = window.open('', '_blank', 'height=600,width=800');
-
-    // grab all CSS
-    const styles = Array.from(document.styleSheets)
-      .map(styleSheet => {
-        try {
-          return Array.from(styleSheet.cssRules)
-            .map(rule => rule.cssText)
-            .join('\n');
-        } catch {
-          // ignore cross‑origin sheets
-          return '';
-        }
-      })
-      .join('\n');
-
-    // get receipt HTML
-    const receiptContent = receiptRef.current.innerHTML;
-
-    // write the full document with conditional close
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>PT.RIAUJAYA CEMERLANG SUZUKI - Receipt</title>
-          <style>${styles}</style>
-          <style>
-            @media print {
-              body { padding:0; margin:0; background:#fff!important; color:#000!important; }
-              .no-print { display:none!important; }
-            }
-            body { font-family:Arial, sans-serif; background:#fff; color:#000; }
-          </style>
-        </head>
-        <body class="bg-white text-black"
-              onload="
-                window.print();
-                ${!isMobile ? 'setTimeout(() => window.close(), 500);' : ''}
-              ">
-          <div class="receipt-content">
-            ${receiptContent}
-          </div>
-        </body>
-      </html>
-    `);
-
-    // close document so onload will fire
-    printWindow.document.close();
-  };
-  
   // reset transaction
   const resetTransaction = () => {
     setSelectedCashierId('');
@@ -330,7 +276,7 @@ const POSSystem = () => {
             currentTransaction={currentTransaction}
             cart={cart}
             utils={utils}
-            printReceipt={printReceipt}
+            printReceipt={() => printReceipt(receiptRef)}
             resetTransaction={resetTransaction}
             colors={colors}
           />

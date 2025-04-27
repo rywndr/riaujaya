@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Receipt from './Receipt';
 import { useAuth } from '../context/AuthContext';
 import { useOutletContext } from 'react-router-dom';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { printReceipt, prepareReceiptData } from '../utils/receiptUtils';
 import * as apiService from '../services/apiService';
+import * as formatters from '../utils/formatters';
+import * as calculations from '../utils/calculations';
 
 const TransactionHistory = () => {
   // get shared colors and dark mode from layout context
@@ -19,6 +23,19 @@ const TransactionHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState({});
   const [error, setError] = useState(null);
+  // receipt viewing states
+  const [viewingReceipt, setViewingReceipt] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [receiptCart, setReceiptCart] = useState([]);
+
+  // combine utils into a single object for ease of use (needed for Receipt component)
+  const utils = {
+    ...formatters,
+    ...calculations
+  };
+
+  // ref to the receipt element for printing
+  const receiptRef = useRef(null);
 
   // load transactions on component mount
   useEffect(() => {
@@ -106,6 +123,36 @@ const TransactionHistory = () => {
     if (newExpandedState) {
       await fetchTransactionDetails(id);
     }
+  };
+
+  // view receipt function
+  const viewReceipt = async (transaction) => {
+    // ensure we have transaction details
+    if (!transaction.items) {
+      await fetchTransactionDetails(transaction.id);
+      // get updated transaction with items from state
+      transaction = transactions.find(t => t.id === transaction.id);
+    }
+
+    // use shared utility to prepare receipt data
+    const { formattedCart, receiptTransaction } = prepareReceiptData(transaction, transaction.items);
+    
+    // set state for viewing receipt
+    setSelectedTransaction(receiptTransaction);
+    setReceiptCart(formattedCart);
+    setViewingReceipt(true);
+  };
+
+  // handle printing receipt using shared utility
+  const handlePrintReceipt = () => {
+    printReceipt(receiptRef);
+  };
+
+  // reset to transaction list view
+  const resetToTransactionList = () => {
+    setViewingReceipt(false);
+    setSelectedTransaction(null);
+    setReceiptCart([]);
   };
 
   // filter transactions
@@ -198,6 +245,32 @@ const TransactionHistory = () => {
     );
   }
 
+  // render receipt view if viewing a receipt
+  if (viewingReceipt && selectedTransaction) {
+    return (
+      <div className={`w-full min-h-screen ${colors.appBg} transition-colors duration-300`}>
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <button
+            onClick={resetToTransactionList}
+            className={`mb-4 px-4 py-2 rounded-lg ${colors.buttonSecondary} transition-colors duration-200`}
+          >
+            &larr; Back to Transaction History
+          </button>
+          
+          <Receipt 
+            receiptRef={receiptRef}
+            currentTransaction={selectedTransaction}
+            cart={receiptCart}
+            utils={utils}
+            printReceipt={handlePrintReceipt}
+            resetTransaction={resetToTransactionList}
+            colors={colors}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`w-full min-h-screen ${colors.appBg} transition-colors duration-300`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
@@ -262,7 +335,7 @@ const TransactionHistory = () => {
                     </div>
                   </th>
                   <th className="px-4 py-2 text-left">
-                    <span>Detail</span>
+                    <span>Actions</span>
                   </th>
                 </tr>
               </thead>
@@ -276,12 +349,18 @@ const TransactionHistory = () => {
                         <td className="px-4 py-3">{transaction.customer_name}</td>
                         <td className="px-4 py-3">{transaction.cashier_name}</td>
                         <td className="px-4 py-3">{formatCurrency(transaction.total_amount)}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 flex space-x-2">
                           <button
                             onClick={() => toggleRowExpansion(transaction.id)}
                             className={`px-3 py-1 rounded ${colors.buttonSecondary} text-sm transition-colors duration-200`}
                           >
                             {expandedRows[transaction.id] ? 'Close' : 'Detail'}
+                          </button>
+                          <button
+                            onClick={() => viewReceipt(transaction)}
+                            className={`px-3 py-1 rounded  ${colors.buttonSecondary} text-white text-sm transition-colors duration-200`}
+                          >
+                            Receipt
                           </button>
                         </td>
                       </tr>
