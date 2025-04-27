@@ -9,7 +9,8 @@ import {
   LineChart, 
   Calendar,
   Settings,
-  Clock
+  Clock,
+  Loader,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -129,27 +130,27 @@ const Dashboard = () => {
     );
   };
 
-  // loading state
+  // render loading state
   if (isLoading) {
     return (
-      <div className={`w-full ${colors.pageBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
+      <div className={`w-full ${colors.appBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <Loader className="h-12 w-12 animate-spin mx-auto" />
           <p className="mt-4">loading data...</p>
         </div>
       </div>
     );
   }
   
-  // error state
+  // render error state
   if (error) {
     return (
-      <div className={`w-full ${colors.pageBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md w-full">
+      <div className={`w-full ${colors.appBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative max-w-md w-full">
           <strong className="font-bold">error!</strong>
           <span className="block sm:inline"> {error}</span>
           <button 
-            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg"
             onClick={() => window.location.reload()}
           >
             try again
