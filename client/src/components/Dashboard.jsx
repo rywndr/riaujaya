@@ -4,11 +4,11 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import { StatCard, ActionButton } from '../components/DashCards';
 import * as apiService from '../services/apiService';
 import { 
-  Bike, 
+  ShoppingCart,
   Wrench, 
   LineChart, 
-  Users, 
   Calendar,
+  Settings,
   Clock
 } from 'lucide-react';
 
@@ -225,7 +225,7 @@ const Dashboard = () => {
           <h2 className={`${colors.textColor} text-xl font-bold mb-4`}>Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <ActionButton 
-              icon={<Bike size={24} />}
+              icon={<ShoppingCart size={24} />}
               label="Point of Sales"
               bgColor={colors.buttonPrimary}
               onClick={() => navigate('/pos')}
@@ -239,8 +239,8 @@ const Dashboard = () => {
             />
 
             <ActionButton 
-              icon={<Users size={24} />}
-              label="..."
+              icon={<Settings size={24} />}
+              label="Manage"
               bgColor="bg-red-500 text-white"
               onClick={() => {}}
             />
