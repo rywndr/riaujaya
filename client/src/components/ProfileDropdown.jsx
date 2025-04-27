@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { User } from 'lucide-react';
+import { User, LogOut, Sun, Moon, ChevronDown } from 'lucide-react';
 import DarkModeToggle from './DarkModeToggle';
 
 const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) => {
@@ -32,38 +32,73 @@ const ProfileDropdown = ({ user, signOut, darkMode, toggleDarkMode, colors }) =>
   
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* profile button */}
+      {/* profile button - modernized with user avatar and email preview */}
       <button 
         onClick={toggleDropdown}
-        className={`flex items-center justify-center p-2 rounded-full ${colors.buttonSecondary} transition-colors duration-200`}
+        className={`flex items-center gap-2 px-3 py-2 rounded-full ${colors.buttonOutline} ${colors.transition}`}
         aria-label="User menu"
       >
-        <User size={20} className={colors.textColor} />
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${colors.buttonSecondary}`}>
+          <User size={16} className={colors.textColor} />
+        </div>
+        
+        {/* show email preview on larger screens */}
+        <span className={`hidden sm:block text-sm font-medium truncate max-w-[100px] ${colors.textColor}`}>
+          {user?.email?.split('@')[0]}
+        </span>
+        
+        <ChevronDown size={16} className={`${colors.textMuted} ${isOpen ? 'rotate-180' : 'rotate-0'} ${colors.transition}`} />
       </button>
       
       {/* dropdown */}
       {isOpen && (
-        <div className={`absolute right-0 mt-2 w-56 py-2 ${colors.cardBg} ${colors.border} border rounded-md shadow-lg z-50`}>
-          {/* user email */}
-          <div className="px-4 py-2 border-b border-opacity-30 border-gray-400">
-            <p className={`text-sm font-medium ${colors.textColor}`}>
-              {user?.email}
-            </p>
+        <div 
+          className={`absolute right-0 mt-2 w-64 py-1 ${colors.cardBg} ${colors.border} border rounded-lg ${colors.shadowLg} z-50 
+                      animate-in fade-in duration-200 slide-in-from-top-5`}
+        >
+          {/* user profile section */}
+          <div className="px-4 py-3 ${colors.divider}">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${colors.buttonSecondary}`}>
+                <User size={18} className={colors.textColor} />
+              </div>
+              <div>
+                <p className={`text-sm font-medium ${colors.textColor}`}>
+                  {user?.email}
+                </p>
+                <p className={`text-xs ${colors.textMuted}`}>
+                  Account Settings
+                </p>
+              </div>
+            </div>
           </div>
           
-          {/* theme toggle  */}
-          <div className="px-4 py-2 border-b border-opacity-30 border-gray-400 flex justify-between items-center">
-            <span className={`text-sm ${colors.textColor}`}>{ darkMode ? "Light" : "Dark"  }</span>
-            <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+          {/* theme toggle */}
+          <div className="px-4 py-2 ${colors.divider}">
+            <div className="flex justify-between items-center py-1">
+              <div className="flex items-center gap-2">
+                {darkMode ? 
+                  <Moon size={16} className={colors.textMuted} /> : 
+                  <Sun size={16} className={colors.textMuted} />
+                }
+                <span className={`text-sm ${colors.textColor}`}>
+                  {darkMode ? "Dark mode" : "Light mode"}
+                </span>
+              </div>
+              <DarkModeToggle darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            </div>
           </div>
           
-          {/* sign out button */}
+          {/* sign out */}
           <div className="px-4 py-2">
             <button
               onClick={handleSignOut}
-              className={`w-full text-left px-3 py-2 rounded text-sm ${colors.buttonDangerBg || 'bg-red-600'} ${colors.buttonDangerText || 'text-white'} hover:opacity-90`}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm 
+                          ${colors.buttonOutline} ${colors.transition} hover:text-red-500
+                          ${darkMode ? 'hover:border-red-500/30 hover:bg-red-500/10' : 'hover:border-red-500/20 hover:bg-red-50'}`}
             >
-              Sign Out
+              <LogOut size={16} />
+              <span>Sign Out</span>
             </button>
           </div>
         </div>
