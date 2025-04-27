@@ -5,6 +5,7 @@ import POSSystem from './components/POSSystem';
 import TransactionHistory from './components/TransactionHistory';
 import Dashboard from './components/Dashboard';
 import Login from './components/Auth/Login';
+import Manage from './components/Manage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
@@ -22,6 +23,7 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/pos" element={<POSSystem />} />
             <Route path="/history" element={<TransactionHistory />} />
+            <Route path="/manage" element={<Manage />} />
           </Route>
           
           {/* fallback redirect */}
