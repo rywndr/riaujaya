@@ -187,8 +187,8 @@ const TransactionForm = ({
             </div>
           )}
           
-          {/* product grid */}
-          <div className="grid grid-cols-3 gap-4 max-h-52 overflow-y-auto pr-1">
+          {/* product grid - increased height from max-h-52 to max-h-96 */}
+          <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-1">
             {filteredProducts.map(product => (
               <div 
                 key={product.id} 
@@ -242,21 +242,21 @@ const TransactionForm = ({
                   </thead>
                   <tbody>
                     {cart.map(item => (
-                      <tr key={item.product_id} className={`border-b ${colors.border} hover:bg-gray-50`}>
+                      <tr key={item.product_id} className={`border-b ${colors.border} ${colors.tableText} ${colors.tableHover}`}>
                         <td className="py-4 px-3">{item.product_name}</td>
                         <td className="text-right px-3 font-mono">{utils.formatCurrency(item.unit_price)}</td>
                         <td className="text-center px-3">
                           <div className="flex items-center justify-center">
                             <button 
-                              className={`p-1 ${colors.tableBg} rounded-l-lg border ${colors.border} hover:bg-gray-200 transition-colors`}
+                              className={`p-2 ${colors.tableBg} rounded-l-lg border ${colors.border} hover:bg-gray-200 transition-colors`}
                               onClick={() => cartFunctions.updateQuantity(item.product_id, Math.max(1, item.quantity - 1))}
                               disabled={item.quantity <= 1}
                             >
                               <Minus size={16} />
                             </button>
-                            <span className={`px-3 py-1 ${colors.inputBg} border-t border-b ${colors.border}`}>{item.quantity}</span>
+                            <span className={`px-3 py-2 ${colors.inputBg} border-t border-b ${colors.border}`}>{item.quantity}</span>
                             <button 
-                              className={`p-1 ${colors.tableBg} rounded-r-lg border ${colors.border} hover:bg-gray-200 transition-colors`}
+                              className={`p-2 ${colors.tableBg} rounded-r-lg border ${colors.border} hover:bg-gray-200 transition-colors`}
                               onClick={() => cartFunctions.updateQuantity(item.product_id, item.quantity + 1)}
                             >
                               <Plus size={16} />
@@ -272,7 +272,7 @@ const TransactionForm = ({
                               const value = parseFloat(e.target.value) || 0;
                               cartFunctions.updateDiscount(item.product_id, value);
                             }}
-                            className={`border ${colors.inputBorder} rounded-lg w-16 p-1 text-right ${colors.inputBg} ${colors.textColor}`}
+                            className={`border ${colors.inputBorder} rounded-lg w-16 p-1 text-right ${colors.inputBg} ${colors.textColor} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
                             min="0"
                             max="100"
                             step="0.01"
