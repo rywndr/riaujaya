@@ -25,7 +25,7 @@ export const validateConfirmPassword = (confirm, password) => {
 
 export const validateEmail = (email) => {
   if (!email.trim()) {
-    return 'email is required';
+    return 'Email is required';
   }
   
   // basic email validation
