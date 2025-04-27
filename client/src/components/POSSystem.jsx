@@ -1,10 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import TransactionForm from './TransactionForm';
 import Receipt from './Receipt';
-import db from '../data/database';
 import * as formatters from '../utils/formatters';
 import * as calculations from '../utils/calculations';
+import * as apiService from '../services/apiService';
 
 const POSSystem = () => {
   // get shared colors and dark mode from layout context
@@ -27,14 +27,49 @@ const POSSystem = () => {
   const [salesNumber, setSalesNumber] = useState('');
   const [printedInfo, setPrintedInfo] = useState('');
   
+  // api data states
+  const [products, setProducts] = useState([]);
+  const [cashiers, setCashiers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   // ref to the receipt element for printing
   const receiptRef = useRef(null);
   
-  // calculate subtotal, total discount, and total
-  const subtotal = cart.reduce((sum, item) => sum + item.total_price, 0);
+  // fetch initial data from api
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // fetch products and cashiers in parallel
+        const [productsData, cashiersData] = await Promise.all([
+          apiService.getProducts(),
+          apiService.getCashiers()
+        ]);
+        
+        setProducts(productsData);
+        setCashiers(cashiersData);
+        setError(null);
+      } catch (err) {
+        setError(`failed to load data: ${err.message}`);
+        console.error('data fetching error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+  
+  // calculate subtotal (pre-discount amount)
+  const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+  
+  // calculate total discount amount
   const totalDiscount = cart.reduce((sum, item) => {
     return sum + utils.calculateDiscountAmount(item.quantity, item.unit_price, item.discount_percentage);
   }, 0);
+  
+  // calculate final total
   const total = subtotal - totalDiscount;
   
   // cart management
@@ -115,12 +150,12 @@ const POSSystem = () => {
   // get cashier name by ID
   const getCashierName = (cashierId) => {
     if (!cashierId) return '';
-    const cashier = db.cashiers.find(c => c.id === parseInt(cashierId));
+    const cashier = cashiers.find(c => c.id === parseInt(cashierId));
     return cashier ? cashier.name : '';
   };
   
   // transaction functions
-  const processTransaction = () => {
+  const processTransaction = async () => {
     if (cart.length === 0) {
       alert('Keranjang kosong!');
       return;
@@ -142,41 +177,48 @@ const POSSystem = () => {
     const printedByInfo = `${getCashierName(selectedCashierId)}, ${utils.formatPrintedDate()}`;
     setPrintedInfo(printedByInfo);
     
-    // create new transaction
-    const newTransaction = {
-      id: db.transactions.length + 1,
-      sales_number: newSalesNumber,
-      transaction_date: new Date().toISOString(),
-      customer_name: finalCustomerName,
-      customer_phone: customerPhone,
-      cashier_name: getCashierName(selectedCashierId),
-      subtotal,
-      discount: totalDiscount,
-      total,
-      notes: notes,
-      printed_by: printedByInfo
-    };
-    
-    // add transaction to db
-    db.transactions.push(newTransaction);
-    
-    // add transaction items to db
-    cart.forEach(item => {
-      const newItem = {
-        id: db.transaction_items.length + 1,
-        transaction_id: newTransaction.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        discount_percentage: item.discount_percentage,
-        total_price: item.total_price
+    try {
+      // create transaction payload for api
+      const transactionData = {
+        sales_number: newSalesNumber,
+        cashier_id: parseInt(selectedCashierId),
+        customer_name: finalCustomerName,
+        customer_phone: customerPhone,
+        subtotal,
+        discount: totalDiscount,
+        total,
+        notes: notes,
+        printed_by: printedByInfo,
+        cart: cart.map(item => ({
+            ...item,
+        })),
       };
-      db.transaction_items.push(newItem);
-    });
-    
-    // set current transaction for receipt
-    setCurrentTransaction(newTransaction);
-    setShowReceipt(true);
+      
+      // send transaction to api
+      const result = await apiService.createTransaction(transactionData);
+      
+      // create transaction object for receipt using api response
+      const newTransaction = {
+        id: result.transaction.id,
+        sales_number: newSalesNumber,
+        transaction_date: result.transaction.created_at || new Date().toISOString(),
+        customer_name: finalCustomerName,
+        customer_phone: customerPhone,
+        cashier_name: getCashierName(selectedCashierId),
+        subtotal,
+        discount: totalDiscount,
+        total,
+        notes: notes,
+        printed_by: printedByInfo
+      };
+      
+      // set current transaction for receipt
+      setCurrentTransaction(newTransaction);
+      setShowReceipt(true);
+    } catch (error) {
+      alert(`transaction error: ${error.message}`);
+      console.error('transaction error:', error);
+    }
   };
 
   // print receipt function
@@ -250,6 +292,35 @@ const POSSystem = () => {
     setPrintedInfo('');
   };
   
+  // loading and error states
+  if (isLoading) {
+    return (
+      <div className={`w-full ${colors.pageBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4">loading data...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className={`w-full ${colors.pageBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md w-full">
+          <strong className="font-bold">error!</strong>
+          <span className="block sm:inline"> {error}</span>
+          <button 
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => window.location.reload()}
+          >
+            try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className={`w-full ${colors.pageBg}`}>
       <div className="max-w-7xl mx-auto px-4 py-2">
@@ -265,7 +336,8 @@ const POSSystem = () => {
           />
         ) : (
           <TransactionForm
-            db={db}
+            products={products}
+            cashiers={cashiers}
             colors={colors}
             utils={utils}
             cartFunctions={cartFunctions}

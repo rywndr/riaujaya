@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
-import useColorClasses from '../hooks/useColorClasses';
-import db from '../data/database';
+import { formatCurrency, formatDate } from '../utils/formatters';
+import { StatCard, ActionButton } from '../components/DashCards';
+import * as apiService from '../services/apiService';
 import { 
   Bike, 
   Wrench, 
@@ -11,92 +12,154 @@ import {
   Clock
 } from 'lucide-react';
 
-// Dashboard component for RJC motorcycle service
 const Dashboard = () => {
   const { colors } = useOutletContext();
   const navigate = useNavigate();
   
-  // State for dashboard data
-  const [todayRevenue, setTodayRevenue] = useState(0);
-  const [monthlyRevenue, setMonthlyRevenue] = useState(0);
-  const [popularProducts, setPopularProducts] = useState([]);
-  const [recentTransactions, setRecentTransactions] = useState([]);
+  // state for dashboard data
+  const [dashboardData, setDashboardData] = useState({
+    todayRevenue: 0,
+    monthlyRevenue: 0,
+    popularProducts: [],
+    recentTransactions: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Load dashboard data on component mount
+  // load data on mount
   useEffect(() => {
-    // Calculate today's revenue
-    const today = new Date().toISOString().split('T')[0];
-    const todayTransactions = db.transactions.filter(
-      trans => trans.transaction_date.split('T')[0] === today
-    );
-    const todayTotal = todayTransactions.reduce((sum, trans) => sum + trans.total, 0);
-    setTodayRevenue(todayTotal);
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // fetch all transactions
+        const transactionsData = await apiService.getTransactions();
+        
+        // calculate revenues and popular products
+        const { todayRevenue, monthlyRevenue, popularProducts } = calculateDashboardMetrics(transactionsData);
+        
+        // get recent transactions (latest 4)
+        const recentTransactions = await fetchRecentTransactions(transactionsData);
 
-    // Calculate monthly revenue
+        setDashboardData({
+          todayRevenue,
+          monthlyRevenue,
+          popularProducts,
+          recentTransactions
+        });
+        
+        setError(null);
+      } catch (err) {
+        setError('failed to load dashboard data. please try again later.');
+        console.error('error fetching dashboard data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // calculate dashboard metrics from transactions
+  const calculateDashboardMetrics = (transactions) => {
+    // calculate today's revenue
+    const today = new Date().toISOString().split('T')[0];
+    const todayTransactions = transactions.filter(
+      trans => trans.transaction_date && trans.transaction_date.split('T')[0] === today
+    );
+    const todayRevenue = todayTransactions.reduce(
+      (sum, trans) => sum + parseFloat(trans.total_amount || 0), 0
+    );
+
+    // calculate monthly revenue
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
-    const monthlyTransactions = db.transactions.filter(trans => {
+    const monthlyTransactions = transactions.filter(trans => {
+      if (!trans.transaction_date) return false;
       const transDate = new Date(trans.transaction_date);
       return transDate.getMonth() === currentMonth && transDate.getFullYear() === currentYear;
     });
-    const monthlyTotal = monthlyTransactions.reduce((sum, trans) => sum + trans.total, 0);
-    setMonthlyRevenue(monthlyTotal);
+    const monthlyRevenue = monthlyTransactions.reduce(
+      (sum, trans) => sum + parseFloat(trans.total_amount || 0), 0
+    );
 
-    // Calculate popular products
-    const productSales = {};
-    db.transaction_items.forEach(item => {
-      if (!productSales[item.product_id]) {
-        productSales[item.product_id] = 0;
+    // calculate popular products from transactions
+    const productCounts = {};
+    transactions.forEach(transaction => {
+      if (transaction.items && Array.isArray(transaction.items)) {
+        transaction.items.forEach(item => {
+          if (item.product_name) {
+            productCounts[item.product_name] = (productCounts[item.product_name] || 0) + 1;
+          }
+        });
       }
-      productSales[item.product_id] += item.quantity;
     });
 
-    // Transform to array and sort by quantity
-    const popularProductsArray = Object.entries(productSales).map(([productId, quantity]) => {
-      const product = db.products.find(p => p.id === productId);
-      return {
-        id: productId,
-        name: product ? product.name : 'Unknown Product',
-        quantity
-      };
-    }).sort((a, b) => b.quantity - a.quantity).slice(0, 5);
+    // convert to array and sort by count
+    const popularProducts = Object.entries(productCounts)
+      .map(([name, quantity]) => ({ name, quantity }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 5);
 
-    setPopularProducts(popularProductsArray);
+    return { todayRevenue, monthlyRevenue, popularProducts };
+  };
 
-    // Get recent transactions
-    const sortedTransactions = [...db.transactions]
-      .sort((a, b) => new Date(b.transaction_date) - new Date(a.transaction_date))
+  // fetch recent transactions with details
+  const fetchRecentTransactions = async (transactions) => {
+    // sort by date descending and take latest 4
+    const sortedTransactions = [...transactions]
+      .sort((a, b) => new Date(b.transaction_date || '') - new Date(a.transaction_date || ''))
       .slice(0, 4);
-
-    // Add items to transactions
-    const transactionsWithItems = sortedTransactions.map(transaction => {
-      const items = db.transaction_items.filter(item => 
-        item.transaction_id === transaction.id
-      );
-      return { ...transaction, items };
-    });
-
-    setRecentTransactions(transactionsWithItems);
-  }, []);
-
-  // Format currency for display
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
+    
+    // fetch transaction details for each recent transaction
+    return Promise.all(
+      sortedTransactions.map(async (transaction) => {
+        try {
+          // only fetch details if valid transaction ID present
+          if (transaction.id) {
+            const details = await apiService.getTransactionById(transaction.id);
+            return { ...transaction, items: details.items || [] };
+          }
+          return { ...transaction, items: [] };
+        } catch (err) {
+          console.error(`error fetching details for transaction ${transaction.id}:`, err);
+          return { ...transaction, items: [] };
+        }
+      })
+    );
   };
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  // loading state
+  if (isLoading) {
+    return (
+      <div className={`w-full ${colors.pageBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4">loading data...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // error state
+  if (error) {
+    return (
+      <div className={`w-full ${colors.pageBg} ${colors.textColor} min-h-screen flex items-center justify-center`}>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md w-full">
+          <strong className="font-bold">error!</strong>
+          <span className="block sm:inline"> {error}</span>
+          <button 
+            className="mt-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => window.location.reload()}
+          >
+            try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const { todayRevenue, monthlyRevenue, popularProducts, recentTransactions } = dashboardData;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -112,29 +175,23 @@ const Dashboard = () => {
 
       {/* statistics cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className={`${colors.cardBg} rounded-lg shadow p-6`}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-              <LineChart size={24} />
-            </div>
-            <div className="ml-4">
-              <p className={`${colors.textMuted} text-sm`}>Today's Revenue</p>
-              <h3 className={`${colors.textColor} text-xl font-bold`}>{formatCurrency(todayRevenue)}</h3>
-            </div>
-          </div>
-        </div>
+        {/* today's revenue */}
+        <StatCard 
+          icon={<LineChart size={24} />} 
+          iconBg="bg-blue-100 text-blue-600"
+          title="Today's Revenue" 
+          value={formatCurrency(todayRevenue)}
+          colors={colors}
+        />
 
-        <div className={`${colors.cardBg} rounded-lg shadow p-6`}>
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <Calendar size={24} />
-            </div>
-            <div className="ml-4">
-              <p className={`${colors.textMuted} text-sm`}>Monthly Sales</p>
-              <h3 className={`${colors.textColor} text-xl font-bold`}>{formatCurrency(monthlyRevenue)}</h3>
-            </div>
-          </div>
-        </div>
+        {/* monthly sales */}
+        <StatCard 
+          icon={<Calendar size={24} />} 
+          iconBg="bg-green-100 text-green-600"
+          title="Monthly Sales" 
+          value={formatCurrency(monthlyRevenue)}
+          colors={colors}
+        />
       </div>
 
       {/* main content area */}
@@ -158,7 +215,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <p className={`${colors.textMuted}`}>No product data available</p>
+              <p className={`${colors.textMuted}`}>no product data available</p>
             )}
           </div>
         </div>
@@ -167,28 +224,26 @@ const Dashboard = () => {
         <div className={`${colors.cardBg} rounded-lg shadow p-6 lg:col-span-2`}>
           <h2 className={`${colors.textColor} text-xl font-bold mb-4`}>Quick Actions</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <button 
+            <ActionButton 
+              icon={<Bike size={24} />}
+              label="Point of Sales"
+              bgColor={colors.buttonPrimary}
               onClick={() => navigate('/pos')}
-              className={`flex flex-col items-center justify-center ${colors.buttonPrimary} p-4 rounded-lg transition-transform hover:scale-105`}
-            >
-              <Bike size={24} />
-              <span className="mt-2 text-sm">Point of Sales</span>
-            </button>
+            />
 
-            <button 
+            <ActionButton 
+              icon={<Clock size={24} />}
+              label="Transaction History"
+              bgColor="bg-amber-600 text-white"
               onClick={() => navigate('/history')}
-              className={`flex flex-col items-center justify-center bg-green-600 text-white p-4 rounded-lg transition-transform hover:scale-105`}
-            >
-              <Clock size={24} />
-              <span className="mt-2 text-sm">Transaction History</span>
-            </button>
+            />
 
-            <button 
-              className={`flex flex-col items-center justify-center bg-purple-600 text-white p-4 rounded-lg transition-transform hover:scale-105`}
-            >
-              <Users size={24} />
-              <span className="mt-2 text-sm">...</span>
-            </button>
+            <ActionButton 
+              icon={<Users size={24} />}
+              label="..."
+              bgColor="bg-red-500 text-white"
+              onClick={() => {}}
+            />
           </div>
         </div>
       </div>
@@ -212,27 +267,19 @@ const Dashboard = () => {
             </thead>
             <tbody>
               {recentTransactions.length > 0 ? (
-                recentTransactions.map((transaction) => {
-                  // Get the first service/product item from the transaction
-                  const firstItem = transaction.items[0];
-                  const product = firstItem ? 
-                    db.products.find(p => p.id === firstItem.product_id)?.name || 'Unknown Service' : 
-                    'Multiple Services';
-                  
-                  return (
-                    <tr key={transaction.id} className={`border-b ${colors.border} ${colors.tableText} hover:bg-gray-50`}>
-                      <td className="py-3 px-4">{transaction.sales_number}</td>
-                      <td className="py-3 px-4">{formatDate(transaction.transaction_date)}</td>
-                      <td className="py-3 px-4">{transaction.customer_name}</td>
-                      <td className="px-4 py-3">{transaction.cashier_name}</td>
-                      <td className="py-3 px-4">{formatCurrency(transaction.total)}</td>
-                    </tr>
-                  );
-                })
+                recentTransactions.map((transaction) => (
+                  <tr key={transaction.id} className={`border-b ${colors.border} ${colors.tableText} ${colors.tableHover}`}>
+                    <td className="py-3 px-4">{transaction.sales_number}</td>
+                    <td className="py-3 px-4">{formatDate(transaction.transaction_date)}</td>
+                    <td className="py-3 px-4">{transaction.customer_name || 'KONSUMEN BENGKEL'}</td>
+                    <td className="px-4 py-3">{transaction.cashier_name}</td>
+                    <td className="py-3 px-4">{formatCurrency(transaction.total_amount)}</td>
+                  </tr>
+                ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="py-4 text-center">
-                    <p className={colors.textMuted}>No recent transactions found</p>
+                  <td colSpan="5" className="py-4 text-center">
+                    <p className={colors.textMuted}>no recent transactions found</p>
                   </td>
                 </tr>
               )}
