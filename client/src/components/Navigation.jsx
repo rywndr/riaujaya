@@ -34,10 +34,11 @@ const Navigation = ({ colors, darkMode, toggleDarkMode }) => {
         <div className="flex items-center justify-between h-16">
           {/* logo and company name */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <Bike className="h-8 w-8 text-blue-600" />
-              <span className={`ml-2 font-bold text-xl ${colors.textColor}`}>PT.RIAUJAYA CEMERLANG</span>
-            </div>
+            <Link to="/" className="flex items-center">
+              <div className="flex-shrink-0 flex items-center">
+                <span className={`ml-2 font-bold text-xl ${colors.textColor}`}>PT.RIAUJAYA CEMERLANG</span>
+              </div>
+            </Link>
           </div>
 
           {/* desktop menu */}
@@ -76,7 +77,7 @@ const Navigation = ({ colors, darkMode, toggleDarkMode }) => {
               History
             </Link>
             <Link
-              to="#"
+              to="/manage"
               className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                 isActive('/manage')
                   ? 'bg-blue-600 text-white'
