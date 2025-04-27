@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 
 const Login = () => {
   // form state
@@ -12,17 +12,54 @@ const Login = () => {
   const [forgotEmail, setForgotEmail] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // form validation state
+  const [formErrors, setFormErrors] = useState({
+    email: '',
+    password: '',
+    forgotEmail: ''
+  });
 
   // get auth context
   const { signIn, resetPassword, loading, error } = useAuth();
 
   const navigate = useNavigate();
 
+  // validation helpers
+  const validateEmail = (email) => {
+    // basic email validation
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validateField = (field, value) => {
+    if (!value.trim()) {
+      return `${field} is required`;
+    }
+    
+    if (field === 'Email' && !validateEmail(value)) {
+      return 'Please enter a valid email address';
+    }
+    
+    return '';
+  };
+
   // handle login submit
   const handleLogin = async (e) => {
     e.preventDefault();
     
-    if (!email || !password) {
+    // validate form fields
+    const emailError = validateField('Email', email);
+    const passwordError = validateField('Password', password);
+    
+    setFormErrors({
+      ...formErrors,
+      email: emailError,
+      password: passwordError
+    });
+    
+    // if any validation errors, stop submission
+    if (emailError || passwordError) {
       return;
     }
     
@@ -32,6 +69,7 @@ const Login = () => {
       // reset form on success
       setEmail('');
       setPassword('');
+      setFormErrors({ email: '', password: '', forgotEmail: '' });
 
       // redirect to app
       navigate('/', { replace: true });
@@ -42,7 +80,16 @@ const Login = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     
-    if (!forgotEmail) {
+    // validate forgot email field
+    const forgotEmailError = validateField('Email', forgotEmail);
+    
+    setFormErrors({
+      ...formErrors,
+      forgotEmail: forgotEmailError
+    });
+    
+    // if validation error, stop submission
+    if (forgotEmailError) {
       return;
     }
     
@@ -54,11 +101,53 @@ const Login = () => {
   const toggleForgotPassword = () => {
     setShowForgotPassword(!showForgotPassword);
     setResetEmailSent(false);
+    // clear errors when switching forms
+    setFormErrors({ email: '', password: '', forgotEmail: '' });
   };
 
   // toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  // input change handlers
+  const handleEmailChange = (e) => {
+    const value = e.target.value;
+    setEmail(value);
+    // clear the error when user types
+    if (formErrors.email) {
+      setFormErrors({ ...formErrors, email: '' });
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+    // clear the error when user types
+    if (formErrors.password) {
+      setFormErrors({ ...formErrors, password: '' });
+    }
+  };
+
+  const handleForgotEmailChange = (e) => {
+    const value = e.target.value;
+    setForgotEmail(value);
+    // clear the error when user types
+    if (formErrors.forgotEmail) {
+      setFormErrors({ ...formErrors, forgotEmail: '' });
+    }
+  };
+
+  // error message component for form fields
+  const ErrorMessage = ({ message }) => {
+    if (!message) return null;
+    
+    return (
+      <div className="flex items-center mt-1 text-sm text-red-600">
+        <AlertCircle size={14} className="mr-1" />
+        <span>{message}</span>
+      </div>
+    );
   };
 
   return (
@@ -108,12 +197,12 @@ const Login = () => {
                       id="forgotEmail"
                       type="email"
                       value={forgotEmail}
-                      onChange={(e) => setForgotEmail(e.target.value)}
+                      onChange={handleForgotEmailChange}
                       placeholder="Enter your email"
-                      className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      required
+                      className={`w-full pl-10 pr-3 py-2 rounded-lg border ${formErrors.forgotEmail ? 'border-red-300 ring-1 ring-red-300' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                     />
                   </div>
+                  <ErrorMessage message={formErrors.forgotEmail} />
                 </div>
                 
                 <button 
@@ -125,7 +214,10 @@ const Login = () => {
                 </button>
                 
                 {error && (
-                  <p className="mt-2 text-sm text-red-600">{error}</p>
+                  <div className="p-3 mt-3 text-sm flex items-center text-red-600 bg-red-50 border border-red-200 rounded-lg">
+                    <AlertCircle size={16} className="mr-2 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
                 )}
               </form>
             )}
@@ -143,10 +235,6 @@ const Login = () => {
         ) : (
           /* login form */
           <div>
-            <h2 className="text-xl text-center font-semibold mb-6 text-gray-800">
-              Login to your account
-            </h2>
-            
             <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label 
@@ -157,18 +245,18 @@ const Login = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Mail size={18} className="text-gray-400" />
+                    <Mail size={18} className={`${formErrors.email ? 'text-red-400' : 'text-gray-400'}`} />
                   </div>
                   <input
                     id="email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
                     placeholder="Enter your email"
-                    className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
+                    className={`w-full pl-10 pr-3 py-2 rounded-lg border ${formErrors.email ? 'border-red-300 ring-1 ring-red-300' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                   />
                 </div>
+                <ErrorMessage message={formErrors.email} />
               </div>
               
               <div>
@@ -180,15 +268,15 @@ const Login = () => {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Lock size={18} className="text-gray-400" />
+                    <Lock size={18} className={`${formErrors.password ? 'text-red-400' : 'text-gray-400'}`} />
                   </div>
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className={`w-full pl-10 pr-10 py-2 rounded-lg border ${formErrors.password ? 'border-red-300 ring-1 ring-red-300' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                     <button
@@ -204,6 +292,7 @@ const Login = () => {
                     </button>
                   </div>
                 </div>
+                <ErrorMessage message={formErrors.password} />
               </div>
               
               <div className="flex items-center justify-between">
@@ -249,8 +338,9 @@ const Login = () => {
               </button>
               
               {error && (
-                <div className="p-3 mt-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                  {error}
+                <div className="p-3 mt-3 text-sm flex items-center text-red-600 bg-red-50 border border-red-200 rounded-lg">
+                  <AlertCircle size={16} className="mr-2 flex-shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
               
