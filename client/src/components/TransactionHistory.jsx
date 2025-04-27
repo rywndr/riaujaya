@@ -496,7 +496,7 @@ const TransactionHistory = () => {
           
           <div className="mt-4 text-right">
             <p className={`${colors.textMuted} text-sm`}>
-              total transaksi: {filteredTransactions.length}
+              Total Transaction: {filteredTransactions.length}
             </p>
           </div>
         </div>
