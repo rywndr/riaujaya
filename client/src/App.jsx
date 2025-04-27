@@ -7,7 +7,7 @@ import Dashboard from './components/Dashboard';
 import Login from './components/Auth/Login';
 import ResetPassword from './components/Auth/ResetPassword';
 import Manage from './components/Manage';
-import AccountSettings from './components/AccountSettings';
+import AccountSettings from './components/Account/AccountSettings';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
