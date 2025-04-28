@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import POSSystem from './components/POS/POSSystem';
-import TransactionHistory from './components/TransactionHistory';
+import TransactionHistory from './components/Transactions/TransactionHistory';
 import Dashboard from './components/Dashboard/MainDashboard';
 import Login from './components/Auth/Login';
 import ResetPassword from './components/Auth/ResetPassword';
