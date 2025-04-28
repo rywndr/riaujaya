@@ -15,6 +15,8 @@ const TransactionTable = ({
   toggleRowExpansion,
   loadingDetails,
   viewReceipt,
+  deleteTransaction,
+  isDeleting,
   colors
 }) => {
   return (
@@ -54,6 +56,8 @@ const TransactionTable = ({
                     transaction={transaction}
                     isExpanded={expandedRows[transaction.id]}
                     toggleRowExpansion={toggleRowExpansion}
+                    onDelete={deleteTransaction}
+                    isDeleting={isDeleting}
                     colors={colors}
                   />
                   {expandedRows[transaction.id] && (

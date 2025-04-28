@@ -44,7 +44,10 @@ const TransactionHistory = () => {
     viewingReceipt,
     resetToTransactionList,
     receiptRef,
-    handlePrintReceipt
+    handlePrintReceipt,
+    deleteTransaction,
+    isDeleting,
+    deleteError
   } = useTransactions();
 
   // column definitions
@@ -112,6 +115,12 @@ const TransactionHistory = () => {
             />
           </div>
           
+          {deleteError && (
+            <div className={`mb-4 p-3 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400`}>
+              {deleteError}
+            </div>
+          )}
+          
           <TransactionTable 
             sortedTransactions={sortedTransactions}
             filteredTransactions={filteredTransactions}
@@ -124,6 +133,8 @@ const TransactionHistory = () => {
             toggleRowExpansion={toggleRowExpansion}
             loadingDetails={loadingDetails}
             viewReceipt={viewReceipt}
+            deleteTransaction={deleteTransaction}
+            isDeleting={isDeleting}
             colors={colors}
           />
         </div>

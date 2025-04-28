@@ -23,6 +23,10 @@ export const useTransactions = () => {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [receiptCart, setReceiptCart] = useState([]);
   
+  // delete states
+  const [isDeleting, setIsDeleting] = useState({});
+  const [deleteError, setDeleteError] = useState(null);
+  
   // reference to receipt element for printing
   const receiptRef = useRef(null);
 
@@ -97,6 +101,34 @@ export const useTransactions = () => {
       setError(`error loading details: ${err.message}`);
     } finally {
       setLoadingDetails(prev => ({ ...prev, [transactionId]: false }));
+    }
+  };
+
+  // delete transaction function
+  const deleteTransaction = async (transactionId) => {
+    try {
+      setIsDeleting(prev => ({ ...prev, [transactionId]: true }));
+      setDeleteError(null);
+      
+      await apiService.deleteTransaction(transactionId);
+      
+      // remove transaction from state
+      setTransactions(prev => prev.filter(t => t.id !== transactionId));
+      
+      // also clean up expandedRows state
+      setExpandedRows(prev => {
+        const newState = { ...prev };
+        delete newState[transactionId];
+        return newState;
+      });
+      
+      return true;
+    } catch (err) {
+      console.error('error deleting transaction:', err);
+      setDeleteError(`failed to delete transaction: ${err.message}`);
+      return false;
+    } finally {
+      setIsDeleting(prev => ({ ...prev, [transactionId]: false }));
     }
   };
 
@@ -241,6 +273,9 @@ export const useTransactions = () => {
     viewingReceipt,
     resetToTransactionList,
     receiptRef,
-    handlePrintReceipt
+    handlePrintReceipt,
+    deleteTransaction,
+    isDeleting,
+    deleteError
   };
 };
