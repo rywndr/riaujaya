@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 
-const useColorClasses = (initialMode = false) => {
-  // initialize from localstorage or fall back to initialmode
+const useColorClasses = (initialMode = null) => {
+
   const [darkMode, setDarkMode] = useState(() => {
+    // check localStorage first for user preference
     const savedMode = localStorage.getItem('darkMode');
-    return savedMode !== null ? JSON.parse(savedMode) : initialMode;
+    if (savedMode !== null) return JSON.parse(savedMode);
+
+    // check for system dark mode preference
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
   
   const colors = {
@@ -67,6 +71,38 @@ const useColorClasses = (initialMode = false) => {
       return newMode;
     });
   };
+  
+  // listen for system preference changes
+  useEffect(() => {
+    // create media query to detect preference changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // handle system preference change
+    const handleChange = (e) => {
+      // only update if no user preference is saved
+      if (!localStorage.getItem('darkMode')) {
+        setDarkMode(e.matches);
+      }
+    };
+    
+    // add listener for system preference changes
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+    } else {
+      // fallback for older browsers
+      mediaQuery.addListener(handleChange);
+    }
+    
+    // cleanup listener on unmount
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handleChange);
+      } else {
+        // fallback for older browsers
+        mediaQuery.removeListener(handleChange);
+      }
+    };
+  }, []);
   
   // set dark mode effect
   useEffect(() => {
