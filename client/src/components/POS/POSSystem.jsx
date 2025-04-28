@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Loader } from 'lucide-react';
-import TransactionForm from './TransactionForm';
-import Receipt from './Receipt';
-import * as formatters from '../utils/formatters';
-import * as calculations from '../utils/calculations';
-import * as apiService from '../services/apiService';
-import { printReceipt, prepareReceiptData } from '../utils/receiptUtils';
+import TransactionForm from './TransactionForm/MainTransactionForm';
+import Receipt from './Receipt/MainReceipt';
+import * as formatters from '../../utils/formatters';
+import * as calculations from '../../utils/calculations';
+import * as apiService from '../../services/apiService';
+import { printReceipt, prepareReceiptData } from '../../utils/receiptUtils';
 
 const POSSystem = () => {
   // get shared colors and dark mode from layout context

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import POSSystem from './components/POSSystem';
+import POSSystem from './components/POS/POSSystem';
 import TransactionHistory from './components/TransactionHistory';
 import Dashboard from './components/Dashboard/MainDashboard';
 import Login from './components/Auth/Login';
