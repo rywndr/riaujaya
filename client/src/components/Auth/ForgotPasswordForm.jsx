@@ -1,6 +1,6 @@
 import React from 'react';
-import { Mail } from 'lucide-react';
-import { ErrorMessage } from '../UI/ErrorMessage';
+import { Mail, Loader } from 'lucide-react';
+import CommonUI from '../UI/CommonUI';
 
 const ForgotPasswordForm = ({
   forgotEmail,
@@ -36,7 +36,7 @@ const ForgotPasswordForm = ({
             className={`w-full pl-10 pr-3 py-2 rounded-lg border ${formErrors.forgotEmail ? 'border-red-300 ring-1 ring-red-300' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
           />
         </div>
-        <ErrorMessage message={formErrors.forgotEmail} />
+        <CommonUI.ErrorMessage message={formErrors.forgotEmail} />
       </div>
       
       <button 
@@ -44,7 +44,14 @@ const ForgotPasswordForm = ({
         className="w-full py-2.5 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
         disabled={loading}
       >
-        {loading ? 'Hang on...' : 'Reset password'}
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <Loader className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+            hang on...
+          </div>
+        ) : (
+          'Reset password'
+        )}
       </button>
     </form>
   );

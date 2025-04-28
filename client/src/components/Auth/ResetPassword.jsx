@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Loader } from 'lucide-react';
+import CommonUI from '../UI/CommonUI';
 import PasswordForm from './PasswordForm';
 import { validatePassword, validateConfirmPassword } from '../../utils/validation';
 import { useUrlToken } from '../../hooks/useUrlToken';
 import { useFormValidation } from '../../hooks/useFormValidation';
-import { StatusMessage } from '../UI/StatusMessage';
 import { AppLogo } from '../UI/AppLogo';
 
 const ResetPassword = () => {
@@ -86,10 +85,10 @@ const ResetPassword = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="w-full max-w-md p-8 mx-auto rounded-xl shadow-lg bg-white border border-gray-200">
-          <div className="text-center">
-            <Loader className="h-12 w-12 animate-spin mx-auto" />
-            <p className="mt-4">loading data...</p>
-          </div>
+          <CommonUI.LoadingView 
+            colors={{ appBg: "bg-white", textColor: "text-gray-800" }} 
+            message="loading data..." 
+          />
         </div>
       </div>
     );
@@ -109,7 +108,7 @@ const ResetPassword = () => {
           </p>
         </div>
         
-        {message.text && <StatusMessage message={message} />}
+        {message.text && <CommonUI.StatusMessage message={message} />}
         
         <PasswordForm 
           newPassword={newPassword}

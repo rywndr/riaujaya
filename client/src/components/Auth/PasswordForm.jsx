@@ -1,6 +1,6 @@
 import React from 'react';
-import { Lock, Eye, EyeOff } from 'lucide-react';
-import { ErrorMessage } from '../UI/ErrorMessage';
+import { Lock, Eye, EyeOff, Loader } from 'lucide-react';
+import CommonUI from '../UI/CommonUI';
 
 const PasswordForm = ({
   newPassword,
@@ -10,7 +10,8 @@ const PasswordForm = ({
   showPassword,
   togglePasswordVisibility,
   formErrors,
-  onSubmit
+  onSubmit,
+  loading = false
 }) => {
   return (
     <form onSubmit={onSubmit} className="space-y-5">
@@ -43,7 +44,7 @@ const PasswordForm = ({
             </button>
           </div>
         </div>
-        <ErrorMessage message={formErrors.password} />
+        <CommonUI.ErrorMessage message={formErrors.password} />
       </div>
       
       <div>
@@ -75,14 +76,22 @@ const PasswordForm = ({
             </button>
           </div>
         </div>
-        <ErrorMessage message={formErrors.confirm} />
+        <CommonUI.ErrorMessage message={formErrors.confirm} />
       </div>
       
       <button 
         type="submit" 
         className="w-full py-2.5 px-4 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        disabled={loading}
       >
-        Change password
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <Loader className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+            Changing password...
+          </div>
+        ) : (
+          'Change password'
+        )}
       </button>
     </form>
   );
