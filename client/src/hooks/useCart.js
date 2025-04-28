@@ -1,8 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as calculations from '../utils/calculations';
 
 export const useCart = () => {
-  const [cart, setCart] = useState([]);
+  // load cart data from localstorage on initial render
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+  
+  // save cart to localstorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
   
   // calculate subtotal (pre-discount amount)
   const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
