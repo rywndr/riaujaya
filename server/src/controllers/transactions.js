@@ -1,5 +1,22 @@
 const { pool } = require('../config/db');
 
+// helper function to format date in +0700
+const formatTime = (date) => {
+  // create date object if string is provided
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  return dateObj.toLocaleString('en-US', {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).replace(/(\d+)\/(\d+)\/(\d+),/, '$3-$1-$2');
+};
+
 // get all transactions
 const getAllTransactions = async (req, res) => {
   try {
@@ -15,7 +32,13 @@ const getAllTransactions = async (req, res) => {
       LEFT JOIN customers cust ON t.customer_id = cust.id
       ORDER BY t.transaction_date DESC
     `);
-    res.json(rows);
+    
+    const formattedRows = rows.map(row => ({
+      ...row,
+      transaction_date: formatTime(row.transaction_date)
+    }));
+    
+    res.json(formattedRows);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -56,8 +79,13 @@ const getTransactionById = async (req, res) => {
       [transactionId]
     );
     
+    const transaction = {
+      ...transactions[0],
+      transaction_date: formatTime(transactions[0].transaction_date)
+    };
+    
     res.json({
-      transaction: transactions[0],
+      transaction: transaction,
       items: items
     });
   } catch (error) {
@@ -114,12 +142,15 @@ const createTransaction = async (req, res) => {
       }
     }
     
-    // insert transaction
+    // get current time for transaction_date
+    const Time = formatTime(new Date());
+    
+    // insert transaction with explicit time
     const [transactionResult] = await connection.query(
       `INSERT INTO transactions 
-       (sales_number, cashier_id, customer_id, total_amount, notes, printed_by) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [sales_number, cashier_id, customer_id, total, notes, printed_by]
+       (sales_number, cashier_id, customer_id, total_amount, notes, printed_by, transaction_date) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [sales_number, cashier_id, customer_id, total, notes, printed_by, Time]
     );
     
     const transaction_id = transactionResult.insertId;
@@ -167,8 +198,13 @@ const createTransaction = async (req, res) => {
       [transaction_id]
     );
     
+    const transaction = {
+      ...transactionData[0],
+      transaction_date: formatTime(transactionData[0].transaction_date)
+    };
+    
     res.status(201).json({
-      transaction: transactionData[0],
+      transaction: transaction,
       items: transactionItems
     });
   } catch (error) {
@@ -237,7 +273,7 @@ const updateTransaction = async (req, res) => {
       }
     }
     
-    // update transaction
+    // update transaction (keeping original transaction_date)
     await connection.query(
       `UPDATE transactions 
        SET sales_number = ?, 
@@ -245,7 +281,7 @@ const updateTransaction = async (req, res) => {
            customer_id = ?, 
            total_amount = ?, 
            notes = ?, 
-           printed_by = ? 
+           printed_by = ?
        WHERE id = ?`,
       [sales_number, cashier_id, customer_id, total, notes, printed_by, transactionId]
     );
@@ -298,8 +334,13 @@ const updateTransaction = async (req, res) => {
       [transactionId]
     );
     
+    const transaction = {
+      ...transactionData[0],
+      transaction_date: formatTime(transactionData[0].transaction_date)
+    };
+    
     res.json({
-      transaction: transactionData[0],
+      transaction: transaction,
       items: transactionItems
     });
   } catch (error) {
