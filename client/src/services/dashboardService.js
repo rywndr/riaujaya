@@ -5,11 +5,14 @@ export const fetchDashboardData = async () => {
   // fetch all transactions
   const transactionsData = await apiService.getTransactions();
   
-  // calculate revenues and popular products
-  const { todayRevenue, monthlyRevenue, popularProducts } = calculateDashboardMetrics(transactionsData);
+  // calculate revenues
+  const { todayRevenue, monthlyRevenue } = calculateRevenueMetrics(transactionsData);
   
   // get recent transactions (latest 4)
   const recentTransactions = await fetchRecentTransactions(transactionsData);
+
+  // get popular products with actual quantities sold
+  const popularProducts = await fetchPopularProducts(transactionsData);
 
   return {
     todayRevenue,
@@ -19,8 +22,8 @@ export const fetchDashboardData = async () => {
   };
 };
 
-// calculate dashboard metrics from transactions
-export const calculateDashboardMetrics = (transactions) => {
+// calculate revenue metrics from transactions
+export const calculateRevenueMetrics = (transactions) => {
   // calculate today's revenue
   const today = new Date().toISOString().split('T')[0];
   const todayTransactions = transactions.filter(
@@ -42,25 +45,53 @@ export const calculateDashboardMetrics = (transactions) => {
     (sum, trans) => sum + parseFloat(trans.total_amount || 0), 0
   );
 
-  // calculate popular products from transactions
-  const productCounts = {};
-  transactions.forEach(transaction => {
-    if (transaction.items && Array.isArray(transaction.items)) {
-      transaction.items.forEach(item => {
-        if (item.product_name) {
-          productCounts[item.product_name] = (productCounts[item.product_name] || 0) + 1;
-        }
-      });
-    }
-  });
+  return { todayRevenue, monthlyRevenue };
+};
 
-  // convert to array and sort by count
-  const popularProducts = Object.entries(productCounts)
+// fetch popular products based on transaction history
+export const fetchPopularProducts = async (transactions) => {
+  // get sample of most recent transactions to analyze
+  // Limit to most recent 50 transactions for performance
+  const transactionSample = [...transactions]
+    .sort((a, b) => new Date(b.transaction_date || '') - new Date(a.transaction_date || ''))
+    .slice(0, 50);
+  
+  // track product quantities sold
+  const productQuantities = {};
+  
+  // fetch transaction details for the sample
+  await Promise.all(
+    transactionSample.map(async (transaction) => {
+      try {
+        if (transaction.id) {
+          const details = await apiService.getTransactionById(transaction.id);
+          
+          if (details.items && Array.isArray(details.items)) {
+            details.items.forEach(item => {
+              if (item.product_name) {
+                // Count by actual quantity sold, not just occurrence
+                const soldQuantity = parseInt(item.quantity) || 1;
+                if (!productQuantities[item.product_name]) {
+                  productQuantities[item.product_name] = 0;
+                }
+                productQuantities[item.product_name] += soldQuantity;
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.error(`Error fetching details for transaction ${transaction.id}:`, err);
+      }
+    })
+  );
+  
+  // convert to array and sort by quantity sold
+  const popularProducts = Object.entries(productQuantities)
     .map(([name, quantity]) => ({ name, quantity }))
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5);
-
-  return { todayRevenue, monthlyRevenue, popularProducts };
+  
+  return popularProducts;
 };
 
 // fetch recent transactions with details
