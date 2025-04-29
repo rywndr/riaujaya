@@ -29,7 +29,10 @@ const ProductList = ({
       <td colSpan="6" className="px-6 py-8 text-center">
         {searchTerm ? (
           <div>
-            <Search className={`h-8 w-8 mx-auto ${colors.textMuted} mb-2`} />
+            <Search 
+              className={`h-8 w-8 mx-auto ${colors.textMuted} mb-2`}
+              strokeWidth={1.5}
+            />
             <p>no products found matching "{searchTerm}"</p>
             <button 
               className={`${colors.buttonOutline} mt-2 px-4 py-1 rounded-lg text-sm`}
@@ -40,7 +43,10 @@ const ProductList = ({
           </div>
         ) : (
           <div>
-            <Package className={`h-8 w-8 mx-auto ${colors.textMuted} mb-2`} />
+            <Package 
+              className={`h-8 w-8 mx-auto ${colors.textMuted} mb-2`} 
+              strokeWidth={1.5}
+            />
             <p>no products found</p>
             <button 
               className={`${colors.buttonPrimary} mt-2 px-4 py-1 rounded-lg text-sm`}
@@ -104,17 +110,28 @@ const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading })
     <tr className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
-          <Package className={`h-5 w-5 mr-2 ${colors.textMuted}`} />
+          <Package 
+            className={`h-5 w-5 mr-2 ${colors.textMuted}`}
+            strokeWidth={1.5}
+          />
           <span>{product.name}</span>
           {product.has_transactions && (
             <div className="ml-2 inline-flex items-center text-xs">
-              <AlertCircle size={14} className="text-amber-500 mr-1" />
+              <AlertCircle 
+                size={14} 
+                className="text-amber-500 mr-1" 
+                strokeWidth={1.5}
+              />
               <span className="text-amber-500">Has transactions</span>
             </div>
           )}
           {isDeleted && (
             <div className="ml-2 inline-flex items-center text-xs">
-              <Archive size={14} className="text-red-500 mr-1" />
+              <Archive 
+                size={14} 
+                className="text-red-500 mr-1" 
+                strokeWidth={1.5}
+              />
               <span className="text-red-500">Archived</span>
             </div>
           )}
@@ -122,7 +139,10 @@ const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading })
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
-          <Barcode className={`h-5 w-5 mr-2 ${colors.textMuted}`} />
+          <Barcode 
+            className={`h-5 w-5 mr-2 ${colors.textMuted}`}
+            strokeWidth={1.5}
+          />
           <span>{product.code}</span>
         </div>
       </td>
@@ -138,15 +158,16 @@ const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading })
             <ActionButton
               onClick={onEdit}
               icon={Edit2}
-              variant="outline"
+              variant="icon-only"
               colors={colors}
               disabled={isLoading}
               className="p-2 rounded-lg inline-flex items-center justify-center"
+              title="Edit product"
             />
             <ActionButton
               onClick={onDelete}
               icon={Trash}
-              variant="danger"
+              variant="icon-danger"
               disabled={isLoading}
               className="p-2 rounded-lg inline-flex items-center justify-center"
               title="Archive product"
@@ -156,7 +177,7 @@ const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading })
           <ActionButton
             onClick={onRestore}
             icon={RefreshCw}
-            variant="success"
+            variant="icon-success"
             disabled={isLoading}
             className="p-2 rounded-lg inline-flex items-center justify-center"
             title="Restore product"

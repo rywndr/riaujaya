@@ -212,7 +212,7 @@ const ProductsTab = ({ products: initialProducts, colors, reloadProducts }) => {
                 Products Inventory
               </h2>
               <p className={`${colors.textMuted} mt-1`}>
-                manage your product catalog and pricing
+                manage your product catalog
               </p>
             </div>
             
