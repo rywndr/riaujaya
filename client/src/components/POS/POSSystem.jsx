@@ -129,6 +129,9 @@ const POSSystem = () => {
       // use prepareReceiptData utility to format transaction data
       const { receiptTransaction } = prepareReceiptData(transaction, cart);
       
+      // clear cart immediately after successful transaction
+      cartFunctions.clearCart();
+      
       // set current transaction for receipt
       setCurrentTransaction(receiptTransaction);
       setShowReceipt(true);
