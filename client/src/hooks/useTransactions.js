@@ -189,23 +189,45 @@ export const useTransactions = () => {
 
   // date filter function
   const getDateFilter = useMemo(() => {
+    // use local timezone for date comparisons
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
     switch(selectedFilter) {
       case 'today': {
-        const todayStr = today.toISOString().split('T')[0];
-        return (date) => date?.split('T')[0] === todayStr;
+        return (dateStr) => {
+          if (!dateStr) return false;
+          // parse date and reset to midnight for comparison
+          const transactionDate = new Date(dateStr);
+          transactionDate.setHours(0, 0, 0, 0);
+          
+          // same day comparison using local time
+          return (
+            transactionDate.getDate() === today.getDate() &&
+            transactionDate.getMonth() === today.getMonth() &&
+            transactionDate.getFullYear() === today.getFullYear()
+          );
+        };
       }
       case 'week': {
         const oneWeekAgo = new Date(today);
         oneWeekAgo.setDate(today.getDate() - 7);
-        return (date) => new Date(date) >= oneWeekAgo;
+        return (dateStr) => {
+          if (!dateStr) return false;
+          const transactionDate = new Date(dateStr);
+          transactionDate.setHours(0, 0, 0, 0);
+          return transactionDate >= oneWeekAgo;
+        };
       }
       case 'month': {
         const oneMonthAgo = new Date(today);
         oneMonthAgo.setMonth(today.getMonth() - 1);
-        return (date) => new Date(date) >= oneMonthAgo;
+        return (dateStr) => {
+          if (!dateStr) return false;
+          const transactionDate = new Date(dateStr);
+          transactionDate.setHours(0, 0, 0, 0);
+          return transactionDate >= oneMonthAgo;
+        };
       }
       default:
         return () => true; // 'all' case - no date filtering
@@ -281,12 +303,12 @@ export const useTransactions = () => {
   // handle items per page change
   const handleItemsPerPageChange = (newItemsPerPage) => {
     setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1); // Reset to first page when changing items per page
+    setCurrentPage(1); 
   };
 
   return {
     transactions,
-    sortedTransactions: paginatedTransactions, // Use paginated transactions instead
+    sortedTransactions: paginatedTransactions,
     filteredTransactions,
     isLoading,
     error,
@@ -310,7 +332,6 @@ export const useTransactions = () => {
     deleteTransaction,
     isDeleting,
     deleteError,
-    // Pagination props
     currentPage,
     itemsPerPage,
     totalPages,

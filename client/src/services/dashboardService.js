@@ -24,18 +24,32 @@ export const fetchDashboardData = async () => {
 
 // calculate revenue metrics from transactions
 export const calculateRevenueMetrics = (transactions) => {
-  // calculate today's revenue
-  const today = new Date().toISOString().split('T')[0];
-  const todayTransactions = transactions.filter(
-    trans => trans.transaction_date && trans.transaction_date.split('T')[0] === today
-  );
+  // calculate today's revenue using local date comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const todayTransactions = transactions.filter(trans => {
+    if (!trans.transaction_date) return false;
+    
+    // parse transaction date and reset hours for date comparison
+    const transDate = new Date(trans.transaction_date);
+    transDate.setHours(0, 0, 0, 0);
+    
+    // compare date components instead of strings
+    return (
+      transDate.getDate() === today.getDate() &&
+      transDate.getMonth() === today.getMonth() &&
+      transDate.getFullYear() === today.getFullYear()
+    );
+  });
+  
   const todayRevenue = todayTransactions.reduce(
     (sum, trans) => sum + parseFloat(trans.total_amount || 0), 0
   );
 
   // calculate monthly revenue
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
+  const currentMonth = today.getMonth();
+  const currentYear = today.getFullYear();
   const monthlyTransactions = transactions.filter(trans => {
     if (!trans.transaction_date) return false;
     const transDate = new Date(trans.transaction_date);
