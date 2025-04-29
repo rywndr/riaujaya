@@ -86,12 +86,6 @@ const TransactionTable = ({
           </tbody>
         </table>
       </div>
-      
-      <div className="mt-4 text-right">
-        <p className={`${colors.textMuted} text-sm`}>
-          Total Transaction: {filteredTransactions.length}
-        </p>
-      </div>
     </>
   );
 };

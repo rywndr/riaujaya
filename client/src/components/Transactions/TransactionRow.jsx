@@ -50,7 +50,7 @@ const TransactionRow = ({
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting[transaction.id]}
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-600 text-white hover:bg-red-700 text-sm ${colors.transition}`}
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white text-sm ${colors.transition}`}
               >
                 {isDeleting[transaction.id] ? 'Deleting...' : 'Confirm'}
               </button>
@@ -65,7 +65,7 @@ const TransactionRow = ({
           ) : (
             <button
               onClick={handleDeleteClick}
-              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-100 text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 text-sm ${colors.transition}`}
+              className={`inline-flex items-center gap-1 px-3 py-1 rounded-full ${colors.cardBg} border ${colors.border} text-sm ${colors.error} hover:bg-red-50 dark:hover:bg-red-900/30 ${colors.transition}`}
             >
               <Trash2 size={14} />
               <span>Delete</span>

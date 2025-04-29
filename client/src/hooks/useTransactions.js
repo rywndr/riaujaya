@@ -18,6 +18,10 @@ export const useTransactions = () => {
   const [sortField, setSortField] = useState('transaction_date');
   const [sortDirection, setSortDirection] = useState('desc');
 
+  // pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // receipt states
   const [viewingReceipt, setViewingReceipt] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
@@ -34,6 +38,11 @@ export const useTransactions = () => {
   useEffect(() => {
     fetchTransactions();
   }, []);
+
+  // reset to first page when filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedFilter]);
 
   // fetch transactions data
   const fetchTransactions = async () => {
@@ -245,15 +254,39 @@ export const useTransactions = () => {
     });
   }, [filteredTransactions, sortField, sortDirection]);
 
+  // paginate transactions
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedTransactions.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedTransactions, currentPage, itemsPerPage]);
+
+  // calculate total pages
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredTransactions.length / itemsPerPage);
+  }, [filteredTransactions, itemsPerPage]);
+
   // handle sort
   const handleSort = (field) => {
     setSortDirection(field === sortField ? (sortDirection === 'asc' ? 'desc' : 'asc') : 'asc');
     setSortField(field);
   };
 
+  // handle page change
+  const handlePageChange = (pageNumber) => {
+    // Ensure page number is within valid range
+    const validPageNumber = Math.max(1, Math.min(pageNumber, totalPages));
+    setCurrentPage(validPageNumber);
+  };
+
+  // handle items per page change
+  const handleItemsPerPageChange = (newItemsPerPage) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
+
   return {
     transactions,
-    sortedTransactions,
+    sortedTransactions: paginatedTransactions, // Use paginated transactions instead
     filteredTransactions,
     isLoading,
     error,
@@ -276,6 +309,12 @@ export const useTransactions = () => {
     handlePrintReceipt,
     deleteTransaction,
     isDeleting,
-    deleteError
+    deleteError,
+    // Pagination props
+    currentPage,
+    itemsPerPage,
+    totalPages,
+    handlePageChange,
+    handleItemsPerPageChange
   };
 };

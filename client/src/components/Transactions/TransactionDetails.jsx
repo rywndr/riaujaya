@@ -63,7 +63,10 @@ const TransactionDetails = ({ transaction, isLoading, colors, viewReceipt }) => 
                 </table>
               </div>
             </div>
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-between items-center mt-4">
+              <p className={`text-xs ${colors.textMuted}`}>
+                Printed by: {transaction.printed_by || '-'}
+              </p>
               <button
                 onClick={() => viewReceipt(transaction)}
                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full ${colors.buttonPrimary} text-sm ${colors.transition}`}
@@ -78,10 +81,6 @@ const TransactionDetails = ({ transaction, isLoading, colors, viewReceipt }) => 
             <p className={`${colors.textMuted}`}>no item details available</p>
           </div>
         )}
-        
-        <p className={`text-right text-xs ${colors.textMuted} mt-2`}>
-          Printed by: {transaction.printed_by || '-'}
-        </p>
       </div>
     </td>
   );
