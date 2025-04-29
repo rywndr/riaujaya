@@ -52,9 +52,9 @@ const TransactionHistory = () => {
 
   // column definitions
   const columns = [
-    { field: 'sales_number', label: 'No. Transaksi' },
-    { field: 'transaction_date', label: 'Tanggal' },
-    { field: 'customer_name', label: 'Pelanggan' },
+    { field: 'sales_number', label: '#Transaction' },
+    { field: 'transaction_date', label: 'Date' },
+    { field: 'customer_name', label: 'Customer' },
     { field: 'cashier_name', label: 'Sales' },
     { field: 'total_amount', label: 'Total' },
   ];
