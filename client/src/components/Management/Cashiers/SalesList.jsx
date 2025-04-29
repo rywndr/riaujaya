@@ -10,8 +10,8 @@ import {
 } from 'lucide-react';
 import ActionButton from '../../UI/ActionButton';
 
-const CashierList = ({ 
-  cashiers, 
+const SalesList = ({ 
+  cashiers,
   totalCount, 
   colors, 
   onEdit, 
@@ -20,7 +20,7 @@ const CashierList = ({
   isLoading, 
   searchTerm, 
   onClearSearch, 
-  onAddCashier 
+  onAddCashier
 }) => {
   return (
     <div className={`${colors.cardBg} rounded-lg ${colors.shadowLg} overflow-hidden`}>
@@ -35,19 +35,19 @@ const CashierList = ({
           </thead>
           <tbody className={`divide-y ${colors.divider} ${colors.textColor}`}>
             {cashiers.length > 0 ? (
-              cashiers.map((cashier) => {
-                const isDeleted = cashier.deleted_at !== null;
+              cashiers.map((salesMember) => {
+                const isDeleted = salesMember.deleted_at !== null;
                 
                 return (
-                  <tr key={cashier.id} className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
+                  <tr key={salesMember.id} className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Users 
                           className={`h-5 w-5 mr-2 ${colors.textMuted}`} 
                           strokeWidth={1.5}
                         />
-                        <span>{cashier.name}</span>
-                        {cashier.has_transactions && (
+                        <span>{salesMember.name}</span>
+                        {salesMember.has_transactions && (
                           <div className="ml-2 inline-flex items-center text-xs">
                             <AlertCircle 
                               size={14} 
@@ -70,37 +70,37 @@ const CashierList = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {new Date(cashier.created_at).toLocaleDateString()}
+                      {new Date(salesMember.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
                       {!isDeleted ? (
                         <>
                           <ActionButton
-                            onClick={() => onEdit(cashier)}
+                            onClick={() => onEdit(salesMember)}
                             icon={Edit2}
                             variant="icon-only"
                             colors={colors}
                             disabled={isLoading}
                             className="p-2 rounded-lg inline-flex items-center justify-center"
-                            title="Edit cashier"
+                            title="Edit team member"
                           />
                           <ActionButton
-                            onClick={() => onDelete(cashier.id)}
+                            onClick={() => onDelete(salesMember.id)}
                             icon={Trash}
                             variant="icon-danger"
                             disabled={isLoading}
                             className="p-2 rounded-lg inline-flex items-center justify-center"
-                            title="Archive cashier"
+                            title="Archive team member"
                           />
                         </>
                       ) : (
                         <ActionButton
-                          onClick={() => onRestore(cashier.id)}
+                          onClick={() => onRestore(salesMember.id)}
                           icon={RefreshCw}
                           variant="icon-success"
                           disabled={isLoading}
                           className="p-2 rounded-lg inline-flex items-center justify-center"
-                          title="Restore cashier"
+                          title="Restore team member"
                         />
                       )}
                     </td>
@@ -116,7 +116,7 @@ const CashierList = ({
                         className={`h-8 w-8 mx-auto ${colors.textMuted} mb-2`} 
                         strokeWidth={1.5}
                       />
-                      <p>no cashiers found matching "{searchTerm}"</p>
+                      <p>no team members found matching "{searchTerm}"</p>
                       <button 
                         className={`${colors.buttonOutline} mt-2 px-4 py-1 rounded-lg text-sm ${colors.transition}`}
                         onClick={onClearSearch}
@@ -130,12 +130,12 @@ const CashierList = ({
                         className={`h-8 w-8 mx-auto ${colors.textMuted} mb-2`} 
                         strokeWidth={1.5}
                       />
-                      <p>no cashiers found</p>
+                      <p>no team members found</p>
                       <button 
                         className={`${colors.buttonPrimary} mt-2 px-4 py-1 rounded-lg text-sm ${colors.transition}`}
                         onClick={onAddCashier}
                       >
-                        add your first cashier
+                        add your first team member
                       </button>
                     </div>
                   )}
@@ -148,11 +148,11 @@ const CashierList = ({
       
       <div className={`px-6 py-4 border-t ${colors.border}`}>
         <p className={`text-sm ${colors.textMuted}`}>
-          showing {cashiers.length} of {totalCount} cashiers
+          showing {cashiers.length} of {totalCount} team members
         </p>
       </div>
     </div>
   );
 };
 
-export default CashierList;
+export default SalesList;

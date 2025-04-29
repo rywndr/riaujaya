@@ -6,7 +6,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-const CashierForm = ({ 
+const SalesForm = ({ 
   colors, 
   onSubmit, 
   onCancel, 
@@ -21,14 +21,14 @@ const CashierForm = ({
   // update form data when initialData changes
   useEffect(() => {
     setFormData(initialData);
-  }, [JSON.stringify(initialData)]); 
+  }, [initialData]); 
   
   // form input change handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // clear error  when user starts typing
+    // clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -71,7 +71,7 @@ const CashierForm = ({
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className={`block mb-2 ${colors.textColor}`}>
-            Cashier name <span className={colors.error}>*</span>
+            Team member name <span className={colors.error}>*</span>
           </label>
           <input
             type="text"
@@ -79,7 +79,7 @@ const CashierForm = ({
             value={formData.name}
             onChange={handleInputChange}
             className={`${colors.inputBg} ${colors.textColor} px-4 py-2 rounded-lg border ${formErrors.name ? 'border-red-500' : colors.inputBorder} w-full focus:outline-none focus:ring-2 ${colors.inputFocus}`}
-            placeholder="Enter cashier name"
+            placeholder="Enter team member name"
           />
           {formErrors.name && (
             <p className={`${colors.error} text-sm mt-1`}>{formErrors.name}</p>
@@ -105,7 +105,7 @@ const CashierForm = ({
             ) : (
               <Check className="h-5 w-5 mr-2" />
             )}
-            {initialData.id ? 'Update cashier' : 'Save cashier'}
+            {initialData.id ? 'Update team member' : 'Save team member'}
           </button>
         </div>
       </form>
@@ -113,4 +113,4 @@ const CashierForm = ({
   );
 };
 
-export default CashierForm;
+export default SalesForm;
