@@ -25,7 +25,8 @@ const fetchWithErrorHandling = async (url, options = {}) => {
 export const checkApiHealth = () => fetchWithErrorHandling('/health');
 
 // products api
-export const getProducts = () => fetchWithErrorHandling('/products');
+export const getProducts = (includeDeleted = false) => 
+  fetchWithErrorHandling(`/products${includeDeleted ? '?deleted=true' : ''}`);
 export const createProduct = (productData) => 
   fetchWithErrorHandling('/products', {
     method: 'POST',
@@ -40,9 +41,14 @@ export const deleteProduct = (id) =>
   fetchWithErrorHandling(`/products/${id}`, {
     method: 'DELETE',
   });
+export const restoreProduct = (id) => 
+  fetchWithErrorHandling(`/products/${id}/restore`, {
+    method: 'PUT',
+  });
 
 // cashiers api
-export const getCashiers = () => fetchWithErrorHandling('/cashiers');
+export const getCashiers = (includeDeleted = false) => 
+  fetchWithErrorHandling(`/cashiers${includeDeleted ? '?deleted=true' : ''}`);
 export const createCashier = (cashierData) => 
   fetchWithErrorHandling('/cashiers', {
     method: 'POST',
@@ -56,6 +62,10 @@ export const updateCashier = (id, cashierData) =>
 export const deleteCashier = (id) => 
   fetchWithErrorHandling(`/cashiers/${id}`, {
     method: 'DELETE',
+  });
+export const restoreCashier = (id) => 
+  fetchWithErrorHandling(`/cashiers/${id}/restore`, {
+    method: 'PUT',
   });
 
 // customers api
@@ -99,11 +109,13 @@ export default {
   createProduct,
   updateProduct,
   deleteProduct,
+  restoreProduct,
   
   getCashiers,
   createCashier,
   updateCashier,
   deleteCashier,
+  restoreCashier,
   
   getCustomers,
   createCustomer,

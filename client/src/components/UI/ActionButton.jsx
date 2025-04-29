@@ -1,12 +1,26 @@
 import React from 'react';
 
-const ActionButton = ({ onClick, icon: Icon, label, variant = 'primary', colors, disabled = false, className = '' }) => {
+const ActionButton = ({ onClick, icon: Icon, label, variant = 'primary', colors = {}, disabled = false, className = '' }) => {
+  // default colors object with fallback values
+  const defaultColors = {
+    buttonPrimary: 'bg-blue-600 text-white hover:bg-blue-700',
+    buttonSecondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
+    buttonOutline: 'border border-gray-300 text-gray-700 hover:bg-gray-100',
+    buttonDanger: 'bg-red-100 text-red-600 hover:bg-red-200'
+  };
+  
+  // merge provided colors with defaults
+  const buttonColors = {
+    ...defaultColors,
+    ...colors
+  };
+  
   const getButtonStyles = () => {
-    if (variant === 'primary') return colors.buttonPrimary;
-    if (variant === 'secondary') return colors.buttonSecondary;
-    if (variant === 'outline') return colors.buttonOutline;
+    if (variant === 'primary') return buttonColors.buttonPrimary;
+    if (variant === 'secondary') return buttonColors.buttonSecondary;
+    if (variant === 'outline') return buttonColors.buttonOutline;
     if (variant === 'danger') return 'bg-red-100 text-red-600 hover:bg-red-200';
-    return colors.buttonPrimary;
+    return buttonColors.buttonPrimary;
   };
   
   return (

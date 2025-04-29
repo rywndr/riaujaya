@@ -3,7 +3,10 @@ import {
   Users, 
   Search, 
   Edit2, 
-  Trash 
+  Trash,
+  AlertCircle,
+  RefreshCw,
+  Archive 
 } from 'lucide-react';
 
 const CashierList = ({ 
@@ -11,7 +14,8 @@ const CashierList = ({
   totalCount, 
   colors, 
   onEdit, 
-  onDelete, 
+  onDelete,
+  onRestore, 
   isLoading, 
   searchTerm, 
   onClearSearch, 
@@ -30,35 +34,65 @@ const CashierList = ({
           </thead>
           <tbody className={`divide-y ${colors.divider} ${colors.textColor}`}>
             {cashiers.length > 0 ? (
-              cashiers.map((cashier) => (
-                <tr key={cashier.id} className={colors.tableHover}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <Users className={`h-5 w-5 mr-2 ${colors.textMuted}`} />
-                      <span>{cashier.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {new Date(cashier.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-                    <button
-                      className={`${colors.buttonOutline} p-2 rounded-lg inline-flex items-center justify-center ${colors.transition}`}
-                      onClick={() => onEdit(cashier)}
-                      disabled={isLoading}
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      className="bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-lg inline-flex items-center justify-center"
-                      onClick={() => onDelete(cashier.id)}
-                      disabled={isLoading}
-                    >
-                      <Trash size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))
+              cashiers.map((cashier) => {
+                const isDeleted = cashier.deleted_at !== null;
+                
+                return (
+                  <tr key={cashier.id} className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Users className={`h-5 w-5 mr-2 ${colors.textMuted}`} />
+                        <span>{cashier.name}</span>
+                        {cashier.has_transactions && (
+                          <div className="ml-2 inline-flex items-center text-xs">
+                            <AlertCircle size={14} className="text-amber-500 mr-1" />
+                            <span className="text-amber-500">Has transactions</span>
+                          </div>
+                        )}
+                        {isDeleted && (
+                          <div className="ml-2 inline-flex items-center text-xs">
+                            <Archive size={14} className="text-red-500 mr-1" />
+                            <span className="text-red-500">Archived</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {new Date(cashier.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
+                      {!isDeleted ? (
+                        <>
+                          <button
+                            className={`${colors.buttonOutline} p-2 rounded-lg inline-flex items-center justify-center ${colors.transition}`}
+                            onClick={() => onEdit(cashier)}
+                            disabled={isLoading}
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            className="bg-red-100 text-red-600 hover:bg-red-200 p-2 rounded-lg inline-flex items-center justify-center"
+                            onClick={() => onDelete(cashier.id)}
+                            disabled={isLoading}
+                            title="Archive cashier"
+                          >
+                            <Trash size={16} />
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          className="bg-green-100 text-green-600 hover:bg-green-200 p-2 rounded-lg inline-flex items-center justify-center"
+                          onClick={() => onRestore(cashier.id)}
+                          disabled={isLoading}
+                          title="Restore cashier"
+                        >
+                          <RefreshCw size={16} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
             ) : (
               <tr>
                 <td colSpan="4" className="px-6 py-8 text-center">

@@ -4,7 +4,10 @@ import {
   Search, 
   Edit2, 
   Trash,
-  Barcode 
+  Barcode,
+  AlertCircle,
+  RefreshCw,
+  Archive
 } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import ActionButton from '../../UI/ActionButton';
@@ -15,6 +18,7 @@ const ProductList = ({
   colors,
   onEdit,
   onDelete,
+  onRestore,
   isLoading,
   searchTerm,
   onClearSearch,
@@ -72,6 +76,7 @@ const ProductList = ({
                   colors={colors}
                   onEdit={() => onEdit(product)}
                   onDelete={() => onDelete(product.id)}
+                  onRestore={() => onRestore(product.id)}
                   isLoading={isLoading}
                 />
               ))
@@ -92,13 +97,27 @@ const ProductList = ({
 };
 
 // product row 
-const ProductRow = ({ product, colors, onEdit, onDelete, isLoading }) => {
+const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading }) => {
+  const isDeleted = product.deleted_at !== null;
+
   return (
-    <tr className={`${colors.tableHover}`}>
+    <tr className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center">
           <Package className={`h-5 w-5 mr-2 ${colors.textMuted}`} />
           <span>{product.name}</span>
+          {product.has_transactions && (
+            <div className="ml-2 inline-flex items-center text-xs">
+              <AlertCircle size={14} className="text-amber-500 mr-1" />
+              <span className="text-amber-500">Has transactions</span>
+            </div>
+          )}
+          {isDeleted && (
+            <div className="ml-2 inline-flex items-center text-xs">
+              <Archive size={14} className="text-red-500 mr-1" />
+              <span className="text-red-500">Archived</span>
+            </div>
+          )}
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -114,21 +133,35 @@ const ProductRow = ({ product, colors, onEdit, onDelete, isLoading }) => {
         {new Date(product.created_at).toLocaleDateString()}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right space-x-2">
-        <ActionButton
-          onClick={onEdit}
-          icon={Edit2}
-          variant="outline"
-          colors={colors}
-          disabled={isLoading}
-          className="p-2 rounded-lg inline-flex items-center justify-center"
-        />
-        <ActionButton
-          onClick={onDelete}
-          icon={Trash}
-          variant="danger"
-          disabled={isLoading}
-          className="p-2 rounded-lg inline-flex items-center justify-center"
-        />
+        {!isDeleted ? (
+          <>
+            <ActionButton
+              onClick={onEdit}
+              icon={Edit2}
+              variant="outline"
+              colors={colors}
+              disabled={isLoading}
+              className="p-2 rounded-lg inline-flex items-center justify-center"
+            />
+            <ActionButton
+              onClick={onDelete}
+              icon={Trash}
+              variant="danger"
+              disabled={isLoading}
+              className="p-2 rounded-lg inline-flex items-center justify-center"
+              title="Archive product"
+            />
+          </>
+        ) : (
+          <ActionButton
+            onClick={onRestore}
+            icon={RefreshCw}
+            variant="success"
+            disabled={isLoading}
+            className="p-2 rounded-lg inline-flex items-center justify-center"
+            title="Restore product"
+          />
+        )}
       </td>
     </tr>
   );

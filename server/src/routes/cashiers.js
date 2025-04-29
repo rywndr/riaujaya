@@ -7,5 +7,6 @@ router.get('/', cashierController.getAllCashiers);
 router.post('/', cashierController.createCashier);
 router.put('/:id', cashierController.updateCashier);
 router.delete('/:id', cashierController.deleteCashier);
+router.put('/:id/restore', cashierController.restoreCashier);
 
 module.exports = router;

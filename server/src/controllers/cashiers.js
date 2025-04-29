@@ -3,7 +3,36 @@ const { pool } = require('../config/db');
 // get all cashiers
 const getAllCashiers = async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM cashiers');
+    // default to showing only active cashiers
+    const showDeleted = req.query.deleted === 'true';
+    
+    // query get cashiers with flag indicating if they're associated in a transaction
+    let query;
+    
+    if (showDeleted) {
+      // Include deleted cashiers
+      query = `
+        SELECT 
+          c.*,
+          IF(COUNT(t.id) > 0, TRUE, FALSE) as has_transactions
+        FROM cashiers c
+        LEFT JOIN transactions t ON c.id = t.cashier_id
+        GROUP BY c.id
+      `;
+    } else {
+      // only active cashiers
+      query = `
+        SELECT 
+          c.*,
+          IF(COUNT(t.id) > 0, TRUE, FALSE) as has_transactions
+        FROM cashiers c
+        LEFT JOIN transactions t ON c.id = t.cashier_id
+        WHERE c.deleted_at IS NULL
+        GROUP BY c.id
+      `;
+    }
+    
+    const [rows] = await pool.query(query);
     res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -57,25 +86,14 @@ const updateCashier = async (req, res) => {
   }
 };
 
-// delete a cashier
+// soft delete a cashier
 const deleteCashier = async (req, res) => {
   try {
     const { id } = req.params;
     
-    // check if cashier is used in any transactions
-    const [transactions] = await pool.query(
-      'SELECT COUNT(*) as count FROM transactions WHERE cashier_id = ?',
-      [id]
-    );
-    
-    if (transactions[0].count > 0) {
-      return res.status(400).json({ 
-        error: 'cannot delete cashier with associated transactions' 
-      });
-    }
-    
+    // set deleted_at timestamp instead of actually deleting
     const [result] = await pool.query(
-      'DELETE FROM cashiers WHERE id = ?',
+      'UPDATE cashiers SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?',
       [id]
     );
     
@@ -83,7 +101,28 @@ const deleteCashier = async (req, res) => {
       return res.status(404).json({ error: 'cashier not found' });
     }
     
-    res.json({ message: 'cashier deleted successfully' });
+    res.json({ message: 'cashier archived successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// restore a previously deleted cashier
+const restoreCashier = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // clear the deleted_at timestamp to restore
+    const [result] = await pool.query(
+      'UPDATE cashiers SET deleted_at = NULL WHERE id = ?',
+      [id]
+    );
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'cashier not found' });
+    }
+    
+    res.json({ message: 'cashier restored successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -93,5 +132,6 @@ module.exports = {
   getAllCashiers,
   createCashier,
   updateCashier,
-  deleteCashier
+  deleteCashier,
+  restoreCashier
 };

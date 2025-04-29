@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Search, 
-  UserPlus
+  UserPlus,
+  Archive,
+  ArchiveRestore
 } from 'lucide-react';
 import * as apiService from '../../services/apiService';
 import CommonUI from '../UI/CommonUI';
@@ -12,20 +14,51 @@ import CashierForm from './Forms/CashierForm';
 import CashierList from './Cashiers/CashierList';
 import Pagination from '../UI/Pagination';
 
-const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
+const SalesTab = ({ cashiers: initialCashiers, colors, reloadCashiers }) => {
   // state for managing cashiers
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingCashier, setEditingCashier] = useState(null);
   const [operationStatus, setOperationStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [allCashiers, setAllCashiers] = useState(initialCashiers || []);
   
   // pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
+  // initialize cashiers from props
+  useEffect(() => {
+    if (initialCashiers && !showArchived) {
+      setAllCashiers(initialCashiers);
+    }
+  }, [initialCashiers]);
+
+  // fetch all cashiers including archived ones when needed
+  useEffect(() => {
+    const fetchCashiers = async () => {
+      try {
+        setIsSubmitting(true);
+        const data = await apiService.getCashiers(showArchived);
+        setAllCashiers(data);
+      } catch (err) {
+        console.error('Error fetching cashiers:', err);
+        setOperationStatus({ type: 'error', text: 'Failed to load cashiers' });
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+    
+    // only fetch if showArchived is true (to see archived cashiers)
+    // or if it was true and now toggling back to false
+    if (showArchived || allCashiers.some(c => c.deleted_at)) {
+      fetchCashiers();
+    }
+  }, [showArchived]);
+
   // filter cashiers based on search term
-  const filteredCashiers = cashiers.filter(cashier => 
+  const filteredCashiers = allCashiers.filter(cashier => 
     cashier.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
@@ -75,7 +108,8 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
       setOperationStatus({ type: 'success', text: 'Cashier added successfully' });
       
       // reload cashiers and reset form
-      await reloadCashiers();
+      const data = await apiService.getCashiers(showArchived);
+      setAllCashiers(data);
       setShowAddForm(false);
     } catch (err) {
       console.error('error adding cashier:', err);
@@ -96,7 +130,8 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
       setOperationStatus({ type: 'success', text: 'cashier updated successfully' });
       
       // reload cashiers and reset form
-      await reloadCashiers();
+      const data = await apiService.getCashiers(showArchived);
+      setAllCashiers(data);
       setEditingCashier(null);
     } catch (err) {
       console.error('error updating cashier:', err);
@@ -107,22 +142,44 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
     }
   };
 
-  // handle delete cashier
+  // handle delete cashier (archive)
   const handleDeleteCashier = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this cashier?')) return;
+    if (!window.confirm('Are you sure you want to archive this cashier?')) return;
     
     try {
       setIsSubmitting(true);
       await apiService.deleteCashier(id);
       
       // show success message
-      setOperationStatus({ type: 'success', text: 'Cashier deleted successfully' });
+      setOperationStatus({ type: 'success', text: 'Cashier archived successfully' });
       
       // reload cashiers
-      await reloadCashiers();
+      const data = await apiService.getCashiers(showArchived);
+      setAllCashiers(data);
     } catch (err) {
-      console.error('Error deleting cashier:', err);
-      setOperationStatus({ type: 'error', text: 'Failed to delete cashier' });
+      console.error('Error archiving cashier:', err);
+      setOperationStatus({ type: 'error', text: 'Failed to archive cashier' });
+    } finally {
+      setIsSubmitting(false);
+      clearOperationStatus();
+    }
+  };
+  
+  // handle restore cashier
+  const handleRestoreCashier = async (id) => {
+    try {
+      setIsSubmitting(true);
+      await apiService.restoreCashier(id);
+      
+      // show success message
+      setOperationStatus({ type: 'success', text: 'Cashier restored successfully' });
+      
+      // reload cashiers
+      const data = await apiService.getCashiers(showArchived);
+      setAllCashiers(data);
+    } catch (err) {
+      console.error('Error restoring cashier:', err);
+      setOperationStatus({ type: 'error', text: 'Failed to restore cashier' });
     } finally {
       setIsSubmitting(false);
       clearOperationStatus();
@@ -133,38 +190,68 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
     setShowAddForm(false);
     setEditingCashier(null);
   };
+  
+  // toggle showing archived cashiers
+  const toggleShowArchived = () => {
+    setShowArchived(prev => !prev);
+    setCurrentPage(1);
+  };
 
   return (
     <div>
       {/* header */}
       <div className={`${colors.cardBg} rounded-lg ${colors.shadow} p-6 mb-6`}>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className={`text-2xl font-bold ${colors.textColor}`}>
-              <Users className="inline-block mr-2" />
-              Sales Team Members
-            </h2>
-            <p className={`${colors.textMuted} mt-1`}>
-              manage your cashiers and sales team
-            </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h2 className={`text-2xl font-bold ${colors.textColor}`}>
+                <Users className="inline-block mr-2" />
+                Sales Team Members
+              </h2>
+              <p className={`${colors.textMuted} mt-1`}>
+                manage your cashiers and sales team
+              </p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <SearchInput
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="search cashiers..."
+                colors={colors}
+                className="flex-1 sm:max-w-xs"
+              />
+              
+              <div className="flex flex-row gap-2">
+                <ActionButton
+                  onClick={handleShowAddForm}
+                  icon={UserPlus}
+                  label="Add Cashier"
+                  colors={colors}
+                  disabled={isSubmitting}
+                  className="flex-1 sm:flex-none"
+                />
+                
+                <ActionButton
+                  onClick={toggleShowArchived}
+                  icon={showArchived ? ArchiveRestore : Archive}
+                  label={showArchived ? "Hide Archived" : "Show Archived"}
+                  variant="outline"
+                  colors={colors}
+                  disabled={isSubmitting}
+                  className="flex-1 sm:flex-none"
+                />
+              </div>
+            </div>
           </div>
           
-          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-            <SearchInput
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="search cashiers..."
-              colors={colors}
-            />
-            
-            <ActionButton
-              onClick={handleShowAddForm}
-              icon={UserPlus}
-              label="Add Cashier"
-              colors={colors}
-              disabled={isSubmitting}
-            />
-          </div>
+          {/* achived status */}
+          {showArchived && (
+            <div className={`p-2 rounded ${colors.cardBg} border border-amber-400 text-center text-sm ${colors.textMuted}`}>
+              <Archive className="inline-block h-4 w-4 mr-1" />
+              Showing active and archived cashiers. Some actions are limited for archived items.
+            </div>
+          )}
         </div>
       </div>
       
@@ -201,6 +288,7 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
         colors={colors}
         onEdit={handleEdit}
         onDelete={handleDeleteCashier}
+        onRestore={handleRestoreCashier}
         isLoading={isSubmitting}
         searchTerm={searchTerm}
         onClearSearch={() => setSearchTerm('')}
