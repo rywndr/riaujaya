@@ -10,6 +10,7 @@ import SearchInput from '../UI/SearchInput';
 import ActionButton from '../UI/ActionButton';
 import CashierForm from './Forms/CashierForm';
 import CashierList from './Cashiers/CashierList';
+import Pagination from '../UI/Pagination';
 
 const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
   // state for managing cashiers
@@ -18,11 +19,34 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
   const [editingCashier, setEditingCashier] = useState(null);
   const [operationStatus, setOperationStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // filter cashiers based on search term
   const filteredCashiers = cashiers.filter(cashier => 
     cashier.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  // calculate pagination values
+  const totalCashiers = filteredCashiers.length;
+  const totalPages = Math.max(1, Math.ceil(totalCashiers / itemsPerPage));
+  
+  // ensure current page is valid after filtering
+  if (currentPage > totalPages) {
+    setCurrentPage(totalPages);
+  }
+
+  // get current page cashiers
+  const indexOfLastCashier = currentPage * itemsPerPage;
+  const indexOfFirstCashier = indexOfLastCashier - itemsPerPage;
+  const currentCashiers = filteredCashiers.slice(indexOfFirstCashier, indexOfLastCashier);
+  
+  // handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   // clear operation status after timeout
   const clearOperationStatus = () => {
@@ -172,8 +196,8 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
       
       {/* cashiers list */}
       <CashierList
-        cashiers={filteredCashiers}
-        totalCount={cashiers.length}
+        cashiers={currentCashiers}
+        totalCount={totalCashiers}
         colors={colors}
         onEdit={handleEdit}
         onDelete={handleDeleteCashier}
@@ -182,6 +206,20 @@ const SalesTab = ({ cashiers, colors, reloadCashiers }) => {
         onClearSearch={() => setSearchTerm('')}
         onAddCashier={handleShowAddForm}
       />
+      
+      {/* pagination controls */}
+      {totalCashiers > 0 && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          handlePageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          setItemsPerPage={setItemsPerPage}
+          totalItems={totalCashiers}
+          colors={colors}
+          itemLabel="Cashiers"
+        />
+      )}
     </div>
   );
 };

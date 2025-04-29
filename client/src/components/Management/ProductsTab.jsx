@@ -12,6 +12,7 @@ import ProductForm from './Forms/ProductForm';
 import ProductList from './Products/ProductList';
 import SearchInput from '../UI/SearchInput';
 import ActionButton from '../UI/ActionButton';
+import Pagination from '../UI/Pagination';
 
 const ProductsTab = ({ products, colors, reloadProducts }) => {
   // state for managing products
@@ -20,12 +21,35 @@ const ProductsTab = ({ products, colors, reloadProducts }) => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [operationStatus, setOperationStatus] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // filter products based on search term
   const filteredProducts = products.filter(product => 
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     product.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // calculate pagination values
+  const totalProducts = filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalProducts / itemsPerPage));
+  
+  // ensure current page is valid after filtering
+  if (currentPage > totalPages) {
+    setCurrentPage(totalPages);
+  }
+
+  // get current page products
+  const indexOfLastProduct = currentPage * itemsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
+  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+  // handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   // clear operation status after timeout
   const clearOperationStatus = () => {
@@ -175,8 +199,8 @@ const ProductsTab = ({ products, colors, reloadProducts }) => {
       
       {/* products list */}
       <ProductList
-        products={filteredProducts}
-        totalCount={products.length}
+        products={currentProducts}
+        totalCount={totalProducts}
         colors={colors}
         onEdit={handleEdit}
         onDelete={handleDeleteProduct}
@@ -185,6 +209,20 @@ const ProductsTab = ({ products, colors, reloadProducts }) => {
         onClearSearch={() => setSearchTerm('')}
         onAddProduct={handleShowAddForm}
       />
+
+      {/* pagination controls */}
+      {totalProducts > 0 && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          handlePageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          setItemsPerPage={setItemsPerPage}
+          totalItems={totalProducts}
+          colors={colors}
+          itemLabel="Products"
+        />
+      )}
     </div>
   );
 };

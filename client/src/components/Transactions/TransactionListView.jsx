@@ -1,7 +1,7 @@
 import React from 'react';
 import TransactionFilters from './TransactionFilters';
 import TransactionTable from './TransactionTable';
-import Pagination from './Pagination';
+import Pagination from '../UI/Pagination';
 
 const TransactionListView = ({
   transactions,
@@ -82,6 +82,7 @@ const TransactionListView = ({
               setItemsPerPage={handleItemsPerPageChange}
               totalItems={filteredTransactions.length}
               colors={colors}
+              itemLabel="Transactions"
             />
           )}
         </div>

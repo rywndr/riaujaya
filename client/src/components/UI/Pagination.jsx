@@ -8,7 +8,8 @@ const Pagination = ({
   itemsPerPage, 
   setItemsPerPage, 
   totalItems,
-  colors 
+  colors,
+  itemLabel,
 }) => {
   // calc display information
   const startItem = Math.min((currentPage - 1) * itemsPerPage + 1, totalItems);
@@ -28,15 +29,12 @@ const Pagination = ({
       const rightOffset = maxPagesToShow - leftOffset - 1;
       
       if (currentPage <= leftOffset + 1) {
- 
         startPage = 1;
         endPage = maxPagesToShow;
       } else if (currentPage >= totalPages - rightOffset) {
- 
         startPage = totalPages - maxPagesToShow + 1;
         endPage = totalPages;
       } else {
-   
         startPage = currentPage - leftOffset;
         endPage = currentPage + rightOffset;
       }
@@ -165,12 +163,12 @@ const Pagination = ({
         </nav>
       </div>
       
-      {/* total transactions count (RIGHT) */}
+      {/* total items count (RIGHT) */}
       <div className={`text-sm font-medium ${colors.textColor} order-3 lg:order-3 flex items-center gap-2`}>
         <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-full ${colors.buttonPrimary} text-white text-xs`}>
           {totalItems}
         </span>
-        <span>Total Transactions</span>
+        <span>Total {itemLabel}</span>
       </div>
     </div>
   );
