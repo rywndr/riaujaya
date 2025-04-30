@@ -17,6 +17,7 @@ const ProductForm = ({
     code: '' 
   });
   const [formErrors, setFormErrors] = useState({});
+  const [formattedPrice, setFormattedPrice] = useState('');
 
   // if editing, populate form with initial data
   useEffect(() => {
@@ -26,10 +27,43 @@ const ProductForm = ({
         unit_price: initialData.unit_price?.toString() || '',
         code: initialData.code || ''
       });
+      
+      // format the initial price value
+      if (initialData.unit_price !== undefined) {
+        // convert to number first to a clean number without formatting
+        const numericPrice = Number(initialData.unit_price);
+        setFormattedPrice(formatNumberWithSeparator(numericPrice.toString()));
+      }
     }
   }, [initialData]);
 
-  // form input change handler
+  // format number with thousand separators
+  const formatNumberWithSeparator = (value) => {
+    // remove any non-digit characters
+    const numericValue = value.replace(/\D/g, '');
+    // format with thousand separators
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // handle price input change
+  const handlePriceChange = (e) => {
+    const rawValue = e.target.value;
+    // remove any non-digit characters
+    const numericValue = rawValue.replace(/\D/g, '');
+    
+    // update the actual form data with the numeric value
+    setFormData(prev => ({ ...prev, unit_price: numericValue }));
+    
+    // format the displayed value with separators
+    setFormattedPrice(formatNumberWithSeparator(numericValue));
+    
+    // clear error for this field when user starts typing
+    if (formErrors.unit_price) {
+      setFormErrors(prev => ({ ...prev, unit_price: null }));
+    }
+  };
+
+  // regular form input change handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -114,16 +148,28 @@ const ProductForm = ({
             required
           />
           
-          <FormInput
-            label="Price"
-            name="unit_price"
-            value={formData.unit_price}
-            onChange={handleInputChange}
-            placeholder="e.g. 10000"
-            colors={colors}
-            error={formErrors.unit_price}
-            required
-          />
+          <div className="form-group">
+            <label className={`block mb-2 ${colors.textColor}`}>
+              Price <span className={colors.error}>*</span>
+            </label>
+            <div className="relative">
+              <div className={`absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none ${colors.textColor} border-r ${colors.border}`}>
+                <span>Rp</span>
+              </div>
+              <input
+                type="text"
+                name="unit_price"
+                value={formattedPrice}
+                onChange={handlePriceChange}
+                placeholder="e.g. 100.000"
+                className={`${colors.inputBg} ${colors.textColor} pl-14 px-4 py-2 rounded-lg border ${formErrors.unit_price ? 'border-red-500' : colors.inputBorder} w-full focus:outline-none focus:ring-2 ${colors.inputFocus}`}
+                required
+              />
+            </div>
+            {formErrors.unit_price && (
+              <p className={`${colors.error} text-sm mt-1`}>{formErrors.unit_price}</p>
+            )}
+          </div>
         </div>
         
         <div className="flex justify-end gap-3">
