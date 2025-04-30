@@ -96,7 +96,7 @@ export const QuickActionsCard = ({ colors, navigate }) => (
         icon={<Settings size={24} />}
         label="Manage"
         bgColor="bg-red-500 text-white"
-        onClick={() => {}}
+        onClick={() => navigate('/manage')}
       />
     </div>
   </div>
