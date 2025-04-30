@@ -146,11 +146,6 @@ const SalesList = ({
         </table>
       </div>
       
-      <div className={`px-6 py-4 border-t ${colors.border}`}>
-        <p className={`text-sm ${colors.textMuted}`}>
-          showing {cashiers.length} of {totalCount} team members
-        </p>
-      </div>
     </div>
   );
 };

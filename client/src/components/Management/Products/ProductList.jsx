@@ -92,11 +92,6 @@ const ProductList = ({
         </table>
       </div>
       
-      <div className={`px-6 py-4 border-t ${colors.divider}`}>
-        <p className={`text-sm ${colors.textMuted}`}>
-          showing {products.length} of {totalCount} products
-        </p>
-      </div>
     </div>
   );
 };
