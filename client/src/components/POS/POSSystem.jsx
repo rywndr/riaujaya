@@ -83,6 +83,9 @@ const POSSystem = () => {
     // use customer name or default
     const finalCustomerName = customerName.trim() || "KONSUMEN BENGKEL";
     
+    // prepends +62 to customer phone number
+    const fullPhoneNumber = window.getCustomerFullPhone ? window.getCustomerFullPhone() : `+62${customerPhone}`;
+    
     // generate sales number
     const newSalesNumber = utils.generateSalesNumber();
     setSalesNumber(newSalesNumber);
@@ -97,7 +100,7 @@ const POSSystem = () => {
         sales_number: newSalesNumber,
         cashier_id: parseInt(selectedCashierId),
         customer_name: finalCustomerName,
-        customer_phone: customerPhone,
+        customer_phone: fullPhoneNumber,
         subtotal,
         discount: totalDiscount,
         total,
@@ -117,7 +120,7 @@ const POSSystem = () => {
         sales_number: newSalesNumber,
         transaction_date: result.transaction.created_at || new Date().toISOString(),
         customer_name: finalCustomerName,
-        customer_phone: customerPhone,
+        customer_phone: fullPhoneNumber,
         cashier_name: getCashierName(selectedCashierId),
         subtotal,
         discount: totalDiscount,
