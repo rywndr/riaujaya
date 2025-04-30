@@ -48,13 +48,14 @@ const SalesList = ({
                         />
                         <span>{salesMember.name}</span>
                         {salesMember.has_transactions && (
-                          <div className="ml-2 inline-flex items-center text-xs">
-                            <AlertCircle 
-                              size={14} 
-                              className="text-amber-500 mr-1" 
-                              strokeWidth={1.5}
-                            />
-                            <span className="text-amber-500">Has transactions</span>
+                          <div className="relative ml-2 group">
+                            <span 
+                              className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"
+                              aria-label="Has transactions"
+                            ></span>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 text-xs bg-gray-800 text-white rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity whitespace-nowrap z-10">
+                              Has transactions
+                            </div>
                           </div>
                         )}
                         {isDeleted && (
