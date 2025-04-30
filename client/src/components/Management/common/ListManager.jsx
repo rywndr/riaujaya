@@ -5,6 +5,7 @@ import CommonUI from '../../UI/CommonUI';
 import SearchInput from '../../UI/SearchInput';
 import ActionButton from '../../UI/ActionButton';
 import Pagination from '../../UI/Pagination';
+import ConfirmationModal from '../../UI/ConfirmationModal';
 
 // generic list manager component that can be used for products or sales
 const ListManager = ({
@@ -38,6 +39,10 @@ const ListManager = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [allItems, setAllItems] = useState(initialItems || []);
+  
+  // confirmation modal state
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
   
   // pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -161,13 +166,19 @@ const ListManager = ({
     }
   };
 
+  // handle initiating delete process
+  const handleInitDeleteItem = (id) => {
+    setItemToDelete(id);
+    setIsDeleteModalOpen(true);
+  };
+
   // handle soft delete item (archive)
-  const handleDeleteItem = async (id) => {
-    if (!window.confirm(`Are you sure you want to archive this ${itemLabel.singular}?`)) return;
+  const handleDeleteItem = async () => {
+    if (!itemToDelete) return;
     
     try {
       setIsSubmitting(true);
-      await deleteItem(id);
+      await deleteItem(itemToDelete);
       
       // show success message
       setOperationStatus({ type: 'success', text: `${itemLabel.singular} archived successfully` });
@@ -181,6 +192,8 @@ const ListManager = ({
     } finally {
       setIsSubmitting(false);
       clearOperationStatus();
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
     }
   };
   
@@ -218,6 +231,24 @@ const ListManager = ({
 
   return (
     <div>
+      {/* confirmation modal */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={handleDeleteItem}
+        title={`Archive ${itemLabel.singular}`}
+        message={`Are you sure you want to archive this ${itemLabel.singular}? This item will be hidden from active views but can be restored later.`}
+        icon={Archive}
+        confirmLabel="Archive"
+        cancelLabel="Cancel"
+        type="danger"
+        colors={colors}
+        isLoading={isSubmitting}
+      />
+
       {/* header */}
       <div className={`${colors.cardBg} rounded-lg shadow-lg p-6 mb-6`}>
         <div className="flex flex-col gap-4">
@@ -306,7 +337,7 @@ const ListManager = ({
         totalCount={totalItems}
         colors={colors}
         onEdit={handleEdit}
-        onDelete={handleDeleteItem}
+        onDelete={handleInitDeleteItem}
         onRestore={handleRestoreItem}
         isLoading={isSubmitting}
         searchTerm={searchTerm}
