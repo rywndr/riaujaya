@@ -20,8 +20,8 @@ const SalesTab = ({ cashiers: initialSalesTeam, colors }) => {
   const salesConfig = {
     itemType: 'sales',
     searchFields: ['name'],
-    headerTitle: 'Sales Team Members',
-    headerDescription: 'manage your sales team members',
+    headerTitle: 'Sales Team',
+    headerDescription: 'manage your sales team',
     itemLabel: { 
       singular: 'sales team member', 
       plural: 'sales team members' 
