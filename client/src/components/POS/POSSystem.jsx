@@ -57,6 +57,9 @@ const POSSystem = () => {
     total
   } = useCart();
 
+  // state to store cart items for receipt view
+  const [receiptCartItems, setReceiptCartItems] = useState([]);
+  
   // ref to the receipt element for printing
   const receiptRef = useRef(null);
   
@@ -132,6 +135,9 @@ const POSSystem = () => {
       // use prepareReceiptData utility to format transaction data
       const { receiptTransaction } = prepareReceiptData(transaction, cart);
       
+      // Store cart items for receipt before clearing the cart
+      setReceiptCartItems([...cart]);
+      
       // clear cart immediately after successful transaction
       cartFunctions.clearCart();
       
@@ -147,6 +153,7 @@ const POSSystem = () => {
   // reset transaction
   const resetTransaction = () => {
     cartFunctions.clearCart();
+    setReceiptCartItems([]);
     resetTransactionState();
   };
   
@@ -167,7 +174,7 @@ const POSSystem = () => {
           <Receipt 
             receiptRef={receiptRef}
             currentTransaction={currentTransaction}
-            cart={cart}
+            cart={receiptCartItems}
             utils={utils}
             printReceipt={() => printReceipt(receiptRef)}
             resetTransaction={resetTransaction}
