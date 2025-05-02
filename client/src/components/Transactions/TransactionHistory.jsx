@@ -65,7 +65,7 @@ const TransactionHistory = () => {
 
   // render loading state
   if (isLoading) {
-    return <CommonUI.LoadingView colors={colors} message="Loading transactions..." />;
+    return <CommonUI.LoadingView colors={colors} message="loading data..." />;
   }
   
   // render error state
