@@ -5,6 +5,7 @@ import POSSystem from './components/POS/POSSystem';
 import TransactionHistory from './components/Transactions/TransactionHistory';
 import Dashboard from './components/Dashboard/MainDashboard';
 import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
 import ResetPassword from './components/Auth/ResetPassword';
 import Manage from './components/Management/Manage';
 import AccountSettings from './components/Account/AccountSettings';
@@ -19,6 +20,7 @@ const App = () => {
         <Routes>
           {/* public routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* protected routes with shared layout */}

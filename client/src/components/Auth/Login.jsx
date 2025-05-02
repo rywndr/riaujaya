@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, Loader } from 'lucide-react';
 import LoginForm from './LoginForm';
@@ -185,7 +185,7 @@ const Login = () => {
             
             <div className="mt-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
               <p className="text-sm text-gray-600">
-                Need an account? Please contact your administrator to create a new user account.
+                Need an account? <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">Register here</Link> or contact your administrator.
               </p>
             </div>
           </div>

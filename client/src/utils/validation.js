@@ -36,3 +36,11 @@ export const validateEmail = (email) => {
   
   return '';
 };
+
+export const validateFullName = (fullName) => {
+  if (!fullName.trim()) {
+    return 'Full name is required';
+  }
+  
+  return '';
+};

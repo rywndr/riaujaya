@@ -67,6 +67,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // sign up with email
+  const signUp = async (email, password, options = {}) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      setError(error.message);
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // sign out
   const signOut = async () => {
     try {
@@ -116,6 +141,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     signIn,
+    signUp,
     signOut,
     resetPassword,
     updatePassword,
