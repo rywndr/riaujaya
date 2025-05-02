@@ -121,22 +121,32 @@ const createTransaction = async (req, res) => {
       });
     }
     
-    // create customer if phone number is provided
+    // create customer logic
     let customer_id = null;
-    if (customer_phone) {
-      // check if customer exists
-      const [existingCustomers] = await connection.query(
-        'SELECT id FROM customers WHERE phone = ?',
-        [customer_phone]
-      );
-      
-      if (existingCustomers.length > 0) {
-        customer_id = existingCustomers[0].id;
+    
+    if (customer_name !== "KONSUMEN BENGKEL") {
+      if (customer_phone && customer_phone.trim() !== '') {
+        // check if customer exists with this phone
+        const [existingCustomersByPhone] = await connection.query(
+          'SELECT id FROM customers WHERE phone = ?',
+          [customer_phone]
+        );
+        
+        if (existingCustomersByPhone.length > 0) {
+          customer_id = existingCustomersByPhone[0].id;
+        } else {
+          // create new customer with phone
+          const [customerResult] = await connection.query(
+            'INSERT INTO customers (name, phone) VALUES (?, ?)',
+            [customer_name, customer_phone]
+          );
+          customer_id = customerResult.insertId;
+        }
       } else {
-        // create new customer
+        // no phone provided then create customer with just name
         const [customerResult] = await connection.query(
-          'INSERT INTO customers (name, phone) VALUES (?, ?)',
-          [customer_name, customer_phone]
+          'INSERT INTO customers (name) VALUES (?)',
+          [customer_name]
         );
         customer_id = customerResult.insertId;
       }
@@ -252,22 +262,34 @@ const updateTransaction = async (req, res) => {
       return res.status(404).json({ error: 'transaction not found' });
     }
     
-    // handle customer info
+    // handle customer info - updated to make phone number optional
     let customer_id = null;
-    if (customer_phone) {
-      // check if customer exists
-      const [existingCustomers] = await connection.query(
-        'SELECT id FROM customers WHERE phone = ?',
-        [customer_phone]
-      );
-      
-      if (existingCustomers.length > 0) {
-        customer_id = existingCustomers[0].id;
+    
+    // Skip the default "KONSUMEN BENGKEL" to create a record for custom name
+    if (customer_name !== "KONSUMEN BENGKEL") {
+      // If phone is provided, try to look up customer by phone
+      if (customer_phone && customer_phone.trim() !== '') {
+        // check if customer exists with this phone
+        const [existingCustomersByPhone] = await connection.query(
+          'SELECT id FROM customers WHERE phone = ?',
+          [customer_phone]
+        );
+        
+        if (existingCustomersByPhone.length > 0) {
+          customer_id = existingCustomersByPhone[0].id;
+        } else {
+          // create new customer with phone
+          const [customerResult] = await connection.query(
+            'INSERT INTO customers (name, phone) VALUES (?, ?)',
+            [customer_name, customer_phone]
+          );
+          customer_id = customerResult.insertId;
+        }
       } else {
-        // create new customer
+        // No phone provided - create customer with just name
         const [customerResult] = await connection.query(
-          'INSERT INTO customers (name, phone) VALUES (?, ?)',
-          [customer_name, customer_phone]
+          'INSERT INTO customers (name) VALUES (?)',
+          [customer_name]
         );
         customer_id = customerResult.insertId;
       }

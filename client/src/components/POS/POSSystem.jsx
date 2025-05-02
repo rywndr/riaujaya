@@ -86,8 +86,11 @@ const POSSystem = () => {
     // use customer name or default
     const finalCustomerName = customerName.trim() || "KONSUMEN BENGKEL";
     
-    // prepends +62 to customer phone number
-    const fullPhoneNumber = window.getCustomerFullPhone ? window.getCustomerFullPhone() : `+62${customerPhone}`;
+    // only format phone number if it's provided
+    let fullPhoneNumber = '';
+    if (customerPhone && customerPhone.trim() !== '') {
+      fullPhoneNumber = window.getCustomerFullPhone ? window.getCustomerFullPhone() : `+62${customerPhone}`;
+    }
     
     // generate sales number
     const newSalesNumber = utils.generateSalesNumber();
@@ -103,7 +106,7 @@ const POSSystem = () => {
         sales_number: newSalesNumber,
         cashier_id: parseInt(selectedCashierId),
         customer_name: finalCustomerName,
-        customer_phone: fullPhoneNumber,
+        customer_phone: fullPhoneNumber, // This can now be an empty string
         subtotal,
         discount: totalDiscount,
         total,
