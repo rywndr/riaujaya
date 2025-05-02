@@ -98,10 +98,23 @@ export const fetchPopularProducts = async (transactions) => {
       }
     })
   );
+
+  // get all active products (not deleted/archived)
+  let activeProducts = [];
+  try {
+    // set includeDeleted to false to get only active products
+    activeProducts = await apiService.getProducts(false);
+  } catch (err) {
+    console.error('Error fetching active products:', err);
+  }
+
+  // create a set of active product names for faster lookup
+  const activeProductNames = new Set(activeProducts.map(product => product.name));
   
-  // convert to array and sort by quantity sold
+  // convert to array and sort by quantity sold, filtering out archived products
   const popularProducts = Object.entries(productQuantities)
     .map(([name, quantity]) => ({ name, quantity }))
+    .filter(product => activeProductNames.has(product.name)) // only include active products
     .sort((a, b) => b.quantity - a.quantity)
     .slice(0, 5);
   
