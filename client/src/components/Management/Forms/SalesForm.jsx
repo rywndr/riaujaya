@@ -18,10 +18,15 @@ const SalesForm = ({
   const [formData, setFormData] = useState(initialData);
   const [formErrors, setFormErrors] = useState({});
   
-  // update form data when initialData changes
+  // update form data when initialData changes, only when ID changes
   useEffect(() => {
-    setFormData(initialData);
-  }, [initialData]); 
+    const currentId = formData?.id;
+    const newId = initialData?.id;
+    
+    if (currentId !== newId) {
+      setFormData(initialData);
+    }
+  }, [initialData?.id]); 
   
   // form input change handler
   const handleInputChange = (e) => {

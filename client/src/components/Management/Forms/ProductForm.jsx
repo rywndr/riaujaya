@@ -21,21 +21,27 @@ const ProductForm = ({
 
   // if editing, populate form with initial data
   useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name || '',
-        unit_price: initialData.unit_price?.toString() || '',
-        code: initialData.code || ''
-      });
-      
-      // format the initial price value
-      if (initialData.unit_price !== undefined) {
-        // convert to number first to a clean number without formatting
-        const numericPrice = Number(initialData.unit_price);
-        setFormattedPrice(formatNumberWithSeparator(numericPrice.toString()));
+    const currentId = formData?.id;
+    const newId = initialData?.id;
+    
+    if (currentId !== newId) {
+      if (initialData) {
+        setFormData({
+          id: initialData.id,
+          name: initialData.name || '',
+          unit_price: initialData.unit_price?.toString() || '',
+          code: initialData.code || ''
+        });
+        
+        // format the initial price value
+        if (initialData.unit_price !== undefined) {
+          // convert to number first to a clean number without formatting
+          const numericPrice = Number(initialData.unit_price);
+          setFormattedPrice(formatNumberWithSeparator(numericPrice.toString()));
+        }
       }
     }
-  }, [initialData]);
+  }, [initialData?.id]);
 
   // format number with thousand separators
   const formatNumberWithSeparator = (value) => {
