@@ -13,6 +13,8 @@ const RegisterForm = ({
   setConfirmPassword,
   showPassword,
   togglePasswordVisibility,
+  showConfirmPassword,
+  toggleConfirmPasswordVisibility,
   formErrors,
   onSubmit,
   loading
@@ -131,7 +133,7 @@ const RegisterForm = ({
           </div>
           <input
             id="confirmPassword"
-            type={showPassword ? "text" : "password"}
+            type={showConfirmPassword ? "text" : "password"}
             value={confirmPassword}
             onChange={handleConfirmPasswordChange}
             placeholder="Confirm your password"
@@ -140,10 +142,10 @@ const RegisterForm = ({
           <div className="absolute inset-y-0 right-0 flex items-center pr-3">
             <button
               type="button"
-              onClick={togglePasswordVisibility}
+              onClick={toggleConfirmPasswordVisibility}
               className="text-gray-400 hover:text-gray-600 focus:outline-none"
             >
-              {showPassword ? (
+              {showConfirmPassword ? (
                 <EyeOff size={18} />
               ) : (
                 <Eye size={18} />

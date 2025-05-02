@@ -16,6 +16,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [registrationComplete, setRegistrationComplete] = useState(false);
   
@@ -78,6 +79,11 @@ const Register = () => {
   // toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+  
+  // toggle confirm password visibility
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   // handle registration submit
@@ -199,6 +205,8 @@ const Register = () => {
               setConfirmPassword={setConfirmPassword}
               showPassword={showPassword}
               togglePasswordVisibility={togglePasswordVisibility}
+              showConfirmPassword={showConfirmPassword}
+              toggleConfirmPasswordVisibility={toggleConfirmPasswordVisibility}
               formErrors={formErrors}
               onSubmit={handleRegister}
               loading={loading}
