@@ -37,6 +37,7 @@ const SalesList = ({
             {cashiers.length > 0 ? (
               cashiers.map((salesMember) => {
                 const isDeleted = salesMember.deleted_at !== null;
+                const memberName = salesMember.name ? salesMember.name.toString() : '';
                 
                 return (
                   <tr key={salesMember.id} className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
@@ -46,8 +47,8 @@ const SalesList = ({
                           className={`h-5 w-5 mr-2 ${colors.textMuted}`} 
                           strokeWidth={1.5}
                         />
-                        <span>{salesMember.name}</span>
-                        {salesMember.has_transactions && (
+                        <span>{memberName}</span>
+                        {Boolean(salesMember.has_transactions) && (
                           <div className="relative ml-2 group">
                             <span 
                               className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"

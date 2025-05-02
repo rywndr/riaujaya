@@ -99,6 +99,9 @@ const ProductList = ({
 // product row 
 const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading }) => {
   const isDeleted = product.deleted_at !== null;
+  
+  // Extract the name to avoid concatenation with has_transactions value
+  const productName = product.name ? product.name.toString() : '';
 
   return (
     <tr className={`${colors.tableHover} ${isDeleted ? 'opacity-70' : ''}`}>
@@ -108,8 +111,8 @@ const ProductRow = ({ product, colors, onEdit, onDelete, onRestore, isLoading })
             className={`h-5 w-5 mr-2 ${colors.textMuted}`}
             strokeWidth={1.5}
           />
-          <span>{product.name}</span>
-          {product.has_transactions && (
+          <span>{productName}</span>
+          {Boolean(product.has_transactions) && (
             <div className="relative ml-2 group">
               <span 
                 className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500"
