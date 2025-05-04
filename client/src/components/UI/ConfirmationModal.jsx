@@ -97,7 +97,7 @@ const ConfirmationModal = ({
               className={`ml-auto rounded-full p-1 ${colors.buttonGhost} ${colors.transition}`}
               aria-label="Close modal"
             >
-              <X className="h-5 w-5" />
+              <X className={`h-5 w-5 ${colors.textColor}`} />
             </button>
           </div>
           
