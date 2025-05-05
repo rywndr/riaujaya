@@ -1,10 +1,9 @@
-
 #  🛵 POS dashboard
 
 >  *pt.riaujaya cemerlang suzuki - motorcycle service & sales management system*
 
   
-![React](https://img.shields.io/badge/-React-61DAFB?style=flat-square&logo=react&logoColor=black)  ![Vite](https://img.shields.io/badge/-Vite-646CFF?style=flat-square&logo=vite&logoColor=white)  ![Tailwind CSS](https://img.shields.io/badge/-Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)  ![Supabase](https://img.shields.io/badge/-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+![React](https://img.shields.io/badge/-React-61DAFB?style=flat-square&logo=react&logoColor=black)  ![Vite](https://img.shields.io/badge/-Vite-646CFF?style=flat-square&logo=vite&logoColor=white)  ![Tailwind CSS](https://img.shields.io/badge/-Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)  ![Supabase](https://img.shields.io/badge/-Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)  ![Express](https://img.shields.io/badge/-Express-000000?style=flat-square&logo=express&logoColor=white)
 
   
 
@@ -57,6 +56,8 @@ a modern, responsive web app built for motorcycle service shops to manage sales,
 - 📊 **MySQL**: backend database (server component)
 
 - 📱 **responsive design**: works on desktop and mobile devices
+
+- 🚀 **Express**: for building the server-side API
 
   
 
@@ -230,4 +231,4 @@ this project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-💻 developed with ❤️ for pt.riaujaya cemerlang suzuki
+💻 developed with ❤️
