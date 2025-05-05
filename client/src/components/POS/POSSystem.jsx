@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import CommonUI from '../UI/CommonUI';
 import TransactionForm from './TransactionForm/MainTransactionForm';
 import Receipt from './Receipt/MainReceipt';
@@ -38,9 +38,7 @@ const POSSystem = () => {
     setCustomerPhone,
     notes,
     setNotes,
-    salesNumber,
     setSalesNumber,
-    printedInfo,
     setPrintedInfo,
     showReceipt,
     setShowReceipt,
