@@ -146,6 +146,7 @@ const ProductForm = ({
             colors={colors}
             error={formErrors.name}
             required={false}
+            showRequired={true}
           />
           
           <FormInput
@@ -157,30 +158,21 @@ const ProductForm = ({
             colors={colors}
             error={formErrors.code}
             required={false}
+            showRequired={true}
           />
           
-          <div className="form-group">
-            <label className={`block mb-2 ${colors.textColor}`}>
-              Price <span className={colors.error}>*</span>
-            </label>
-            <div className="relative">
-              <div className={`absolute inset-y-0 left-0 flex items-center px-3 pointer-events-none ${colors.textColor} border-r ${colors.border}`}>
-                <span>Rp</span>
-              </div>
-              <input
-                type="text"
-                name="unit_price"
-                value={formattedPrice}
-                onChange={handlePriceChange}
-                placeholder="e.g. 100.000"
-                className={`${colors.inputBg} ${colors.textColor} pl-14 px-4 py-2 rounded-lg border ${formErrors.unit_price ? 'border-red-500' : colors.inputBorder} w-full focus:outline-none focus:ring-2 ${colors.inputFocus}`}
-                required={false}
-              />
-            </div>
-            {formErrors.unit_price && (
-              <CommonUI.ErrorMessage message={formErrors.unit_price} />
-            )}
-          </div>
+          <FormInput
+            label="Price"
+            name="unit_price"
+            value={formattedPrice}
+            onChange={handlePriceChange}
+            placeholder="e.g. 100.000"
+            colors={colors}
+            error={formErrors.unit_price}
+            required={false}
+            showRequired={true}
+            prefix="Rp"
+          />
         </div>
         
         <div className="flex justify-end gap-3">
