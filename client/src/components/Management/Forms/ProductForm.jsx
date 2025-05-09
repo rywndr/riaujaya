@@ -85,7 +85,7 @@ const ProductForm = ({
     const errors = {};
     
     if (!formData.name.trim()) {
-      errors.name = 'Name is required';
+      errors.name = 'Product Name is required';
     }
     
     if (!formData.unit_price.trim()) {
