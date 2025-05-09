@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, RefreshCw } from 'lucide-react';
 import FormInput from '../../UI/FormInput';
 import ActionButton from '../../UI/ActionButton';
+import CommonUI from '../../UI/CommonUI';
 
 const ProductForm = ({ 
   colors, 
@@ -106,7 +107,11 @@ const ProductForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    const isValid = validateForm();
+    
+    if (!isValid) {
+      return false;
+    }
     
     // format the unit_price as a number before sending
     const productData = {
@@ -130,7 +135,7 @@ const ProductForm = ({
         />
       </div>
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <FormInput
             label="Product Name"
@@ -140,7 +145,7 @@ const ProductForm = ({
             placeholder="Enter product name"
             colors={colors}
             error={formErrors.name}
-            required
+            required={false}
           />
           
           <FormInput
@@ -151,7 +156,7 @@ const ProductForm = ({
             placeholder="Enter product code"
             colors={colors}
             error={formErrors.code}
-            required
+            required={false}
           />
           
           <div className="form-group">
@@ -169,11 +174,11 @@ const ProductForm = ({
                 onChange={handlePriceChange}
                 placeholder="e.g. 100.000"
                 className={`${colors.inputBg} ${colors.textColor} pl-14 px-4 py-2 rounded-lg border ${formErrors.unit_price ? 'border-red-500' : colors.inputBorder} w-full focus:outline-none focus:ring-2 ${colors.inputFocus}`}
-                required
+                required={false}
               />
             </div>
             {formErrors.unit_price && (
-              <p className={`${colors.error} text-sm mt-1`}>{formErrors.unit_price}</p>
+              <CommonUI.ErrorMessage message={formErrors.unit_price} />
             )}
           </div>
         </div>
