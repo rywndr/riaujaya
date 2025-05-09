@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import TransactionRow from './TransactionRow';
 import TransactionDetails from './TransactionDetails';
 
@@ -35,10 +35,10 @@ const TransactionTable = ({
                     <span>{column.label}</span>
                     {sortField === column.field ? (
                       sortDirection === 'asc' ? 
-                        <ArrowUp size={14} /> : 
-                        <ArrowDown size={14} />
+                        <ArrowUp size={14} className="text-blue-500" /> : 
+                        <ArrowDown size={14} className="text-blue-500" />
                     ) : (
-                      <div className="w-3.5" /> 
+                      <ArrowUpDown size={14} className="text-gray-400" /> 
                     )}
                   </div>
                 </th>
