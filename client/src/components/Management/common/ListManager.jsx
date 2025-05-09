@@ -40,6 +40,10 @@ const ListManager = ({
   const [showArchived, setShowArchived] = useState(false);
   const [allItems, setAllItems] = useState(initialItems || []);
   
+  // sorting state
+  const [sortField, setSortField] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
+  
   // confirmation modal state
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
@@ -76,18 +80,46 @@ const ListManager = ({
     }
   }, [showArchived, fetchItems, itemLabel]);
 
-  // filter items based on search term
+  // filter items based on search term and archived status
   const filteredItems = allItems.filter(item => {
-    if (!searchTerm) return true;
-    
-    return searchFields.some(field => {
+    // filter by search term
+    const matchesSearch = !searchTerm || searchFields.some(field => {
       const fieldValue = item[field];
       return fieldValue && fieldValue.toLowerCase().includes(searchTerm.toLowerCase());
     });
+    
+    // filter by archived status
+    const matchesArchiveFilter = showArchived 
+      ? item.deleted_at !== null 
+      : item.deleted_at === null;
+
+    return matchesSearch && matchesArchiveFilter;
   });
 
+  // sort items
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    const fieldA = a[sortField];
+    const fieldB = b[sortField];
+
+    if (fieldA < fieldB) return sortDirection === 'asc' ? -1 : 1;
+    if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // handle column sorting
+  const handleSort = (field) => {
+    if (sortField === field) {
+      // toggle direction if same field clicked
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // set new field and default to ascending
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
   // calculate pagination values
-  const totalItems = filteredItems.length;
+  const totalItems = sortedItems.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   
   // ensure current page is valid after filtering
@@ -98,7 +130,7 @@ const ListManager = ({
   // get current page items
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = sortedItems.slice(indexOfFirstItem, indexOfLastItem);
 
   // handle page change
   const handlePageChange = (pageNumber) => {
@@ -299,7 +331,7 @@ const ListManager = ({
           {showArchived && (
             <div className={`p-2 rounded ${colors.cardBg} border border-amber-400 text-center text-sm ${colors.textMuted}`}>
               <Archive className="inline-block h-4 w-4 mr-1" />
-              Showing active and archived {itemLabel.plural}. Some actions are limited for archived items.
+              Showing archived {itemLabel.plural} only. Click "Hide Archived" to return to active items.
             </div>
           )}
         </div>
@@ -343,6 +375,9 @@ const ListManager = ({
         searchTerm={searchTerm}
         onClearSearch={() => setSearchTerm('')}
         onAddItem={handleShowAddForm}
+        onSort={handleSort}
+        sortField={sortField}
+        sortDirection={sortDirection}
       />
 
       {/* pagination controls */}

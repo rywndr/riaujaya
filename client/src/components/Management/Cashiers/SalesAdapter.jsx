@@ -12,7 +12,10 @@ const SalesAdapter = ({
   isLoading, 
   searchTerm, 
   onClearSearch, 
-  onAddItem 
+  onAddItem,
+  onSort,
+  sortField,
+  sortDirection
 }) => {
   return (
     <SalesList
@@ -26,6 +29,9 @@ const SalesAdapter = ({
       searchTerm={searchTerm}
       onClearSearch={onClearSearch}
       onAddCashier={onAddItem}
+      onSort={onSort}
+      sortField={sortField}
+      sortDirection={sortDirection}
     />
   );
 };

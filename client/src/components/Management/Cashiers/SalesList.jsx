@@ -6,7 +6,10 @@ import {
   Trash,
   AlertCircle,
   RefreshCw,
-  Archive 
+  Archive,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
 } from 'lucide-react';
 import ActionButton from '../../UI/ActionButton';
 
@@ -20,7 +23,10 @@ const SalesList = ({
   isLoading, 
   searchTerm, 
   onClearSearch, 
-  onAddCashier
+  onAddCashier,
+  onSort,
+  sortField,
+  sortDirection
 }) => {
   return (
     <div className={`${colors.cardBg} rounded-lg ${colors.shadowLg} overflow-hidden`}>
@@ -28,8 +34,36 @@ const SalesList = ({
         <table className="min-w-full divide-y ${colors.divider}">
           <thead className={`${colors.tableHeaderBg} ${colors.tableText}`}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Created</th>
+              <th 
+                onClick={() => onSort('name')}
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Name</span>
+                  {sortField === 'name' ? (
+                    sortDirection === 'asc' ? 
+                      <ArrowUp size={14} className="text-blue-500" /> : 
+                      <ArrowDown size={14} className="text-blue-500" />
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th 
+                onClick={() => onSort('created_at')}
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
+              >
+                <div className="flex items-center gap-1">
+                  <span>Created</span>
+                  {sortField === 'created_at' ? (
+                    sortDirection === 'asc' ? 
+                      <ArrowUp size={14} className="text-blue-500" /> : 
+                      <ArrowDown size={14} className="text-blue-500" />
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>

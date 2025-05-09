@@ -6,7 +6,10 @@ import {
   Trash,
   Barcode,
   RefreshCw,
-  Archive
+  Archive,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown
 } from 'lucide-react';
 import { formatCurrency } from '../../../utils/formatters';
 import ActionButton from '../../UI/ActionButton';
@@ -21,7 +24,10 @@ const ProductList = ({
   isLoading,
   searchTerm,
   onClearSearch,
-  onAddProduct
+  onAddProduct,
+  onSort,
+  sortField,
+  sortDirection
 }) => {
   const EmptyState = () => (
     <tr>
@@ -65,10 +71,66 @@ const ProductList = ({
         <table className={`min-w-full divide-y ${colors.divider}`}>
           <thead className={`${colors.tableHeaderBg} ${colors.tableText}`}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Product</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Code</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Price</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Created</th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
+                onClick={() => onSort('name')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Product</span>
+                  {sortField === 'name' ? (
+                    sortDirection === 'asc' ? 
+                      <ArrowUp size={14} className="text-blue-500" /> : 
+                      <ArrowDown size={14} className="text-blue-500" />
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
+                onClick={() => onSort('code')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Code</span>
+                  {sortField === 'code' ? (
+                    sortDirection === 'asc' ? 
+                      <ArrowUp size={14} className="text-blue-500" /> : 
+                      <ArrowDown size={14} className="text-blue-500" />
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
+                onClick={() => onSort('unit_price')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Price</span>
+                  {sortField === 'unit_price' ? (
+                    sortDirection === 'asc' ? 
+                      <ArrowUp size={14} className="text-blue-500" /> : 
+                      <ArrowDown size={14} className="text-blue-500" />
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer"
+                onClick={() => onSort('created_at')}
+              >
+                <div className="flex items-center gap-1">
+                  <span>Created</span>
+                  {sortField === 'created_at' ? (
+                    sortDirection === 'asc' ? 
+                      <ArrowUp size={14} className="text-blue-500" /> : 
+                      <ArrowDown size={14} className="text-blue-500" />
+                  ) : (
+                    <ArrowUpDown size={14} className="text-gray-400" />
+                  )}
+                </div>
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
