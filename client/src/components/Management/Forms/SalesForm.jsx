@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ActionButton from '../../UI/ActionButton';
+import CommonUI from '../../UI/CommonUI';
 import { 
   X, 
   Check, 
@@ -87,7 +88,7 @@ const SalesForm = ({
             placeholder="Enter team member name"
           />
           {formErrors.name && (
-            <p className={`${colors.error} text-sm mt-1`}>{formErrors.name}</p>
+            <CommonUI.ErrorMessage message={formErrors.name} />
           )}
         </div>
         
