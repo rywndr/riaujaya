@@ -108,7 +108,7 @@ const CustomerInfoForm = ({
           value={customerName}
           onChange={(e) => setCustomerName(e.target.value)}
           className={inputClasses}
-          placeholder="Workshop customer"
+          placeholder="Workshop customer (optional)"
         />
       </FormField>
       
@@ -123,7 +123,7 @@ const CustomerInfoForm = ({
             onChange={handlePhoneChange}
             onBlur={handleBlur}
             className={`${inputClasses} rounded-l-none ${phoneError && touched ? 'border-red-500' : ''}`}
-            placeholder="8xxxxxxxxxx"
+            placeholder="8xxxxxxxxxx (optional)"
           />
         </div>
         {phoneError && touched ? (
