@@ -91,7 +91,6 @@ const ActionButtons = ({ resetTransaction, processTransaction, cartIsEmpty, colo
     <button
       onClick={processTransaction}
       className={`${colors.buttonPrimary} py-1 px-2 rounded-lg font-medium text-md transition-all duration-200 hover:opacity-90 flex items-center justify-center`}
-      disabled={cartIsEmpty}
     >
       Process Transaction
     </button>
