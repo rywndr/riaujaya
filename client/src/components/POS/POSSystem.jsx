@@ -72,12 +72,12 @@ const POSSystem = () => {
   const processTransaction = async () => {
     
     if (cart.length === 0) {
-      alert('Keranjang kosong!');
+      alert('Cart is empty!');
       return;
     }
     
     if (!selectedCashierId) {
-      alert('Pilih nama kasir');
+      alert('Select a sales representative!');
       return;
     }
     
