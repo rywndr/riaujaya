@@ -35,9 +35,7 @@ a modern, responsive web app built for motorcycle service shops to manage sales,
 
 - 👥 **team management**: manage sales staff and track performance
 
-- 🌓 **dark/light mode**: comfortable viewing in any environment
-
-- 🔒 **secure authentication**: role-based access with Supabase
+- 🔒 **secure auth**: auth with Supabase
 
   
 
@@ -46,8 +44,6 @@ a modern, responsive web app built for motorcycle service shops to manage sales,
   
 
 - ⚛️ **React**: for building the user interface
-
-- 🪄 **Vite**: for fast development and optimized builds
 
 - 🎨 **Tailwind CSS**: for responsive, utility-first styling
 
